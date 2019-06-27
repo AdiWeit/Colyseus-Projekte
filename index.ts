@@ -6,11 +6,11 @@ import { Server } from 'colyseus';
 import { monitor } from '@colyseus/monitor';
 
 // Import demo room handlers
-/*import { ChatRoom } from "./rooms/01-chat-room";
-import { StateHandlerRoom } from "./rooms/02-state-handler";
-import { AuthRoom } from "./rooms/03-auth";
-import { CreateOrJoinRoom } from "./rooms/04-create-or-join-room";
-import { SchereSteinPapierRoom } from "./rooms/SchereSteinPapier"; */
+// import { ChatRoom } from "./rooms/01-chat-room";
+// import { StateHandlerRoom } from "./rooms/02-state-handler";
+// import { AuthRoom } from "./rooms/03-auth";
+// import { CreateOrJoinRoom } from "./rooms/04-create-or-join-room";
+import { SchereSteinPapierRoom } from "./rooms/SchereSteinPapier";
 import { vierGewinntRoom } from "./rooms/4gewinnt";
 import { heldenDesOlympRoom } from "./rooms/heldenDesOlymp";
 import { monopolyKartenspiel } from "./rooms/monopolyKartenspiel";
@@ -43,7 +43,7 @@ const gameServer = new Server({
 // Register CreateOrJoin as "create_or_join"
 // gameServer.register("create_or_join", CreateOrJoinRoom);
 
-// gameServer.register("schere_stein_papier", SchereSteinPapierRoom);
+gameServer.register("schere_stein_papier", SchereSteinPapierRoom);
 
 gameServer.register("4gewinnt", vierGewinntRoom);
 
