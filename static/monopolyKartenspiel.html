@@ -183,7 +183,7 @@
             AblageListe[4][0] = "beendet";
             AblageListe[8] = "NixDaVollendet";
             if (message.data == "einen Geldhai") {
-              geldhai();
+                geldhai();
             }
             if (message.data == "einen Zwangstausch") {
               schlauGeklaut();
@@ -224,7 +224,9 @@
               }
             });
           }
+      /*    setTimeout(function () {
           datenAktuallisieren();
+        }, 500); */
         } else {
           console.log("Nix da Battle verloren :(");
           if (spielerIch == spielerAktuell == false && message.Status[0] == "richtigerSpielerEmpfangen" == false && message.Empfänger == spielerAktuell == false) {
@@ -248,7 +250,7 @@
             GeburtstagFunction();
           }
         }
-        datenAktuallisieren();
+      //  datenAktuallisieren();
       }
     }
     if (message.Empfänger == spielerIch && message.type == "NixDa" && message.Status[0] == "abgebrochen" == false && message.Status[0] == "richtigerSpielerEmpfangen" == false && zustand[0] == "abgebrochen" == false) {
@@ -949,6 +951,7 @@
          }
          zählerListe[2]++;
        } */
+  // datenAktuallisieren();
   }
 
   function Miete() {
@@ -1194,17 +1197,18 @@
     spieler[spielerIch].kartenMitte[AblageListe[2]][2][spieler[spielerIch].kartenMitte[AblageListe[2]][2].length - 1] += 4;
   }
 
-  function geldhai() {
-    AblageListe[0] = 5;
-    console.log("bezahlen " + AblageListe[3] + " ( " + AblageListe[0] + "€)");
-    bezahlen();
-    spieler[spielerIch].einkommen[0] += 5;
-    spieler[spielerIch].einkommen[spieler[spielerIch].einkommen.length] = 5;
+    function geldhai() {
+      AblageListe[0] = 5;
+  //    console.log(spieler[spielerIch].einkommen[0]);
+      console.log("bezahlen " + AblageListe[3] + " ( " + AblageListe[0] + "€)");
+      bezahlen();
+    //  console.log(spieler[spielerIch].einkommen[0]);
+      console.log(spieler[spielerIch].einkommen[0]);
+      spieler[spielerIch].einkommen[0] += 5;
+      spieler[spielerIch].einkommen[spieler[spielerIch].einkommen.length] = 5;
+      console.log(spieler[spielerIch].einkommen[0]);
+      datenAktuallisieren();
   }
-  /*function karteKlauen() {
-    spieler[spielerIch].kartenMitte[spieler[spielerIch].kartenMitte.length] = spieler[AblageListe[3]].kartenMitte[AblageListe[2]]
-    spieler[AblageListe[3]].kartenMitte.splice([AblageListe[2]], 1);
-  } */
   function karteWeggeben() {
     /*  spieler[AblageListe[3]].kartenMitte[spieler[AblageListe[3]].kartenMitte.length] = spieler[spielerIch].kartenMitte[AblageListe[2]];
       spieler[spielerIch].kartenMitte.splice([AblageListe[2]], 1); */
@@ -1534,6 +1538,12 @@
     }
     else if (AblageListe[4][0] == "bezahlen Gegner") {
       canvas.fillText(AblageListe[4][0] + " Verbleibend: " + AblageListe[4][1], 10 + scrollX, 750 + 27);
+    }
+    else if (AblageListe[4][0] == "beendet" && spielerAktuell == spielerIch) {
+      canvas.fillText(" Verbleibende Züge: " + restlicheZüge, 10 + scrollX, 750 + 27);
+    }
+    else if (AblageListe[4][0] == "beendet") {
+      canvas.fillText("warten auf Gegner", 10 + scrollX, 750 + 27);
     }
     else {
       canvas.fillText(AblageListe[4][0], 10 + scrollX, 750 + 27);

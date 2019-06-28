@@ -52,6 +52,7 @@ export class SchereSteinPapierRoom extends Room {
     if (!(this.player1 && this.player2)) return this.broadcast("Es fehlt noch ein Spieler!");
 
     if (client.sessionId === this.player1.id) {
+      console.log(data.message);
       if (!rules[data.message]) {
         return this.broadcast(`${client.sessionId} sagt: ${data.message}`);
       }
