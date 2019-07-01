@@ -144,6 +144,7 @@
           kartenZiehen.shift();
           spieler[spielerIch].kartenIch[spieler[spielerIch].kartenIch.length] = kartenZiehen[0];
           kartenZiehen.shift();
+          window.scroll(0,0);
         }
       }, 300);
       new Audio("http://www.orangefreesounds.com/wp-content/uploads/2019/03/Elevator-ding-dong-sound-effect.mp3").play();
@@ -153,6 +154,9 @@
       AblageListe[4][0] = ["beendet"];
       alert("Bezahlung vollendet! Sie können nun weiterspielen, wenn sie noch Züge zur Verfügung haben.")
       datenAktuallisieren();
+      if ((restlicheZüge < 1 || spieler[spielerIch].kartenIch.length < 1) && AblageListe[4][0] == "beendet") {
+        Spielerwechsel();
+      }
     }
     if (message.type == "AnzahlSpieler") AnzahlSpieler = message.data;
     if (message.type == "kartenMitte") spieler[message.sender].kartenMitte = message.data;
@@ -269,7 +273,9 @@
     if (message.Empfänger == spielerIch && message.type == "NixDa" && message.Status[0] == "abgebrochen" == false && message.Status[0] == "richtigerSpielerEmpfangen" == false && zustand[0] == "abgebrochen" == false) {
       zustand[0] = message.Status[0];
       if (spieler[spielerIch].kartenIch.some(x => x.includes("Nix Da"))) {
-
+        textButton = "Meine Karten";
+        Layout();
+        window.scroll(250,0);
         if (confirm("Wollen sie ihre Nix Da Karte gegen " + message.data + " einsetzen?")) {
           zählerListe[3] = 0;
           while (zählerListe[3] < spieler[spielerIch].kartenIch.length) {
@@ -1324,7 +1330,7 @@
     zählerListe[0] = 0;
     zählerListe[1] = -1;
     while ((spieler[spielerIch].kartenMitte.length < spieler[AblageListe[3]].kartenMitte.length && zählerListe[0] < spieler[spielerIch].kartenMitte.length) || (spieler[spielerIch].kartenMitte.length > spieler[AblageListe[3]].kartenMitte.length && zählerListe[0] <= spieler[spielerIch].kartenMitte.length)) {
-      if (spieler[spielerIch].kartenMitte[zählerListe[0]][4] == spieler[AblageListe[3]].kartenMitte[zählerListe[0]][4]) {
+      if (spieler[AblageListe[3]].kartenMitte[zählerListe[0]] == undefined == false && spieler[spielerIch].kartenMitte[zählerListe[0]][4] == spieler[AblageListe[3]].kartenMitte[zählerListe[0]][4]) {
         spieler[spielerIch].einkommen[0] += (spieler[spielerIch].kartenMitte[zählerListe[0]][1])*spieler[spielerIch].kartenMitte[zählerListe[0]][5].length;
         while (spieler[spielerIch].kartenMitte[zählerListe[0]][5].length > 0) {
           spieler[spielerIch].einkommen[spieler[spielerIch].einkommen.length] = spieler[spielerIch].kartenMitte[zählerListe[0]][1];
