@@ -306,8 +306,8 @@ export class monopolyKartenspiel extends Room {
       console.log("Empfänger" + data.message.Empfänger)
       if (data.message.Empfänger == 0) this.send(this.player1.client, data.message);
       if (data.message.Empfänger == 1) this.send(this.player2.client, data.message);
-      if (data.message.Empfänger == 2) this.send(this.player3.client, data.message);
-      if (data.message.Empfänger == 3) this.send(this.player4.client, data.message);
+      if (data.message.Empfänger == 2 /*&& this.player3.client == undefined == false*/) this.send(this.player3.client, data.message);
+      if (data.message.Empfänger == 3/* && this.player4.client == undefined == false*/) this.send(this.player4.client, data.message);
     }
   }
   onDispose() {
