@@ -53,7 +53,7 @@
     console.log("PC");
   }
 
-  setInterval(Test, 100)
+//  setInterval(Test, 100)
 
   function Test() {
     canvas.fillStyle =  "red" //"#FF8000"
@@ -144,7 +144,12 @@
           kartenZiehen.shift();
           spieler[spielerIch].kartenIch[spieler[spielerIch].kartenIch.length] = kartenZiehen[0];
           kartenZiehen.shift();
-          window.scroll(0,0);
+          if (AnzahlSpieler < 4) {
+            window.scroll(0,73);
+          }
+          else {
+            window.scroll(0,0);
+          }
         }
       }, 300);
       new Audio("http://www.orangefreesounds.com/wp-content/uploads/2019/03/Elevator-ding-dong-sound-effect.mp3").play();
