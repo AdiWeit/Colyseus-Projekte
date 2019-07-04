@@ -1,4 +1,7 @@
 <script type="text/javascript" src="colyseus.js"></script>
+<script src="http://adi.nicolaiweitkemper.de/Database/js.js"></script>
+<ul id="spielstände" font-size:30px>
+</ul>
 <canvas id="textur" width="2560" height="790"></canvas>
 <meta charset="utf-8">
 <h2 id="aktivitätstext"></h2>
@@ -24,6 +27,8 @@
   var gebote = [0, false, false, false, false];
   var restlicheZüge = 3;
   var bieter = 0;
+  var nameSpiel = "none";
+  var spielstände = [];
   var Bild = new Image();
   Bild.src = "http://adi.nicolaiweitkemper.de/Bilder/regenbogen004_1024x768.jpg";
 
@@ -53,7 +58,7 @@
     console.log("PC");
   }
 
-//  setInterval(Test, 10000)
+  setInterval(Test, 10000)
 
   function Test() {
   /*  canvas.fillStyle =  "red" //"#FF8000"
@@ -86,6 +91,36 @@
   });
 
   room.onMessage.add(function(message) {
+
+    if (message.type == "namenSpieler") {
+      alert("Das Spiel wurde unter dem Namen " + message.data + " gespeichert.");
+      nameSpiel = message.data;
+      if (message.nameSpielerVorher == undefined == false) {
+        spieler[message.Empfänger - 1].name = message.nameSpielerVorher;
+      }
+      spieler[spielerIch].name = prompt("Unter welchen Namen wollen sie sich abspeichern? (Der Name muss später zum Laden des Spielstandes wieder eingegeben werden!)");
+      datenAktuallisieren();
+      if (message.Empfänger > AnzahlSpieler - 2) {
+        console.log(spieler);
+        dbGet("monopolyKartenspiel", "spielstände", function(result) {
+          if (result == "NOPE" == false && result == "" == false) {
+            spielstände = result.toString().split(',');
+          }
+        spielstände[spielstände.length] = nameSpiel;
+        dbSet("monopolyKartenspiel", "spielstände", spielstände);
+        });
+      }
+      else {
+        room.send({
+          message: {
+            "type": "namenSpieler",
+            "data": nameSpiel,
+            "Empfänger": (message.Empfänger + 1),
+            "nameSpielerVorher": spieler[spielerIch].name
+          }
+        });
+      }
+    }
 
     if (message.type == "reloadPage") {location.reload();audio = new Audio("http://adi.nicolaiweitkemper.de/Sounds/FAIL%20SOUND%20EFFECT.mp3").play();}
     if (message.type == "test") {
@@ -124,7 +159,9 @@
         canvas.drawImage(Bild, 260, 0);
       }, 100);
     }
-
+    if (message.type == undefined && message.includes("gewonnen")) {
+      serverDatenLöschen();
+    }
     if (message.type == "kartenSpieler") {
       spieler[message.sender].kartenIch = message.data;
     }
@@ -436,6 +473,87 @@
       }
     });
   }
+
+  function speichernServer() {
+    nameSpiel = prompt("Wie wollen sie diese Runde benennen?");
+    room.send({
+      message: {
+        "type": "namenSpieler",
+        "data": nameSpiel,
+        "Empfänger": 0
+      }
+    });
+    AblageListe[9] = nameSpiel;
+  }
+  function serverDatenLöschen() {
+    if (AblageListe[9] == undefined == false) {
+      dbSet("monopolyKartenspiel", AblageListe[9] + " spieler", "NOPE");
+      dbSet("monopolyKartenspiel", AblageListe[9] + " kartenZiehen", "NOPE");
+      zählerListe[0] = 0;
+      dbGet("monopolyKartenspiel", "spielstände", function(result) {
+        spielstände = result.toString().split(',');
+      while (zählerListe[0] < spielstände.length) {
+        if (spielstände[zählerListe[0]] == AblageListe[9]) {
+          spielstände.splice([zählerListe[0]], 1);
+          dbSet("monopolyKartenspiel", "spielstände", spielstände);
+        }
+        zählerListe[0]++;
+      }
+    });
+    }
+  }
+function ServerLaden() {
+    dbGet("monopolyKartenspiel", "spielstände", function(result) {
+      spielstände = result.toString().split(',');
+      while (zählerListe[0] < spielstände.length) {
+      var ul = document.getElementById("spielstände");
+      var li = document.createElement("li");
+          li.appendChild(document.createTextNode(spielstände[zählerListe[0]]));
+          li.setAttribute("id", zählerListe[0]);
+          ul.appendChild(li);
+        zählerListe[0]++;
+      }
+
+      var items = document.querySelectorAll("#spielstände"),
+          tab = [], liIndex;
+
+
+              for(i = 0; i < items.length; i++){
+                  tab.push(items[i].innerHTML);
+              }
+
+
+              for(var i = 0; i < items.length; i++){
+
+                  items[i].onclick = function(){
+
+                    AblageListe[0] = prompt("Wie haben sie sich für den Spielstand genannt?")
+                      liIndex = tab.indexOf(this.innerHTML);
+                      console.log(spielstände[liIndex]);
+                      AblageListe[9] = spielstände[liIndex]
+                      dbGet("monopolyKartenspiel",AblageListe[9] + " spieler" , function(result) {
+                        if (result.some(x => x.includes(AblageListe[0]))) {
+                          spieler = JSON.parse(result);
+                          console.log(spieler);
+                            dbGet("monopolyKartenspiel",AblageListe[9] + " kartenZiehen" , function(result) {
+                              kartenZiehen = result.toString().split(',');
+                              dbGet("monopolyKartenspiel",AblageListe[9] + " kartenZiehen" , function(result) {
+                                restlicheZüge = result.toString().split(',')[2];
+                                spielerGegner = result.toString().split(',')[1];
+                                spielerIch    = result.toString().split(',')[0];
+                                Layout();
+                              });
+                            });
+                        }
+                        else {
+                          alert("Ihr Name ist in der gespeicherten Datei nicht vorhanden!")
+                        }
+                          });
+                  };
+
+              }
+      });
+}
 
   function readMouseMove(e) {
     xMaus = e.clientX + hinzufügenX;
@@ -938,6 +1056,11 @@
   });
 
   function datenAktuallisieren() {
+    if (spieler[AnzahlSpieler - 1].name == undefined == false) {
+      dbSet("monopolyKartenspiel", nameSpiel + " spieler", JSON.stringify(spieler));
+      dbSet("monopolyKartenspiel", nameSpiel + " kartenZiehen", kartenZiehen);
+      /* neu */        dbSet("monopolyKartenspiel", nameSpiel + spieler[spielerIch].name + " 1-stellige", [spielerIch, spielerGegner, restlicheZüge]);
+    }
     zählerListe[0] = 0;
     room.send({
       message: {

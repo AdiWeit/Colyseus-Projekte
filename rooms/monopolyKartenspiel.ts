@@ -301,13 +301,15 @@ export class monopolyKartenspiel extends Room {
       }
       if (AblageListe[0][data.message.sender] > 2) this.broadcast(data.message.sender + " hat gewonnen!!!")
     }
-    if (data.message.type == "Gebot" == false) this.broadcast(data.message)
-    if (data.message.type == "Gebot") {
+    if (data.message.type == "Gebot" || data.message.type == "namenSpieler") {
       console.log("Empfänger" + data.message.Empfänger)
       if (data.message.Empfänger == 0) this.send(this.player1.client, data.message);
       if (data.message.Empfänger == 1) this.send(this.player2.client, data.message);
       if (data.message.Empfänger == 2 /*&& this.player3.client == undefined == false*/) this.send(this.player3.client, data.message);
       if (data.message.Empfänger == 3/* && this.player4.client == undefined == false*/) this.send(this.player4.client, data.message);
+    }
+    else {
+      this.broadcast(data.message);
     }
   }
   onDispose() {
