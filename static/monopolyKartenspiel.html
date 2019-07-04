@@ -508,7 +508,8 @@
 function ServerLaden() {
     dbGet("monopolyKartenspiel", "spielstände", function(result) {
       spielstände = result.toString().split(',');
-      while (zählerListe[0] < spielstände.length) {
+      zählerListe[0] = 0;
+      while (zählerListe[0] < spielstände.length && spielstände[0] == "NOPE" == false) {
       var ul = document.getElementById("spielstände");
       var li = document.createElement("li");
           li.appendChild(document.createTextNode(spielstände[zählerListe[0]]));
