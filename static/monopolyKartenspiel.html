@@ -61,7 +61,7 @@
     console.log("PC");
   }
 
-  setInterval(Test, 20000)
+  setInterval(Test, 10000)
 
   function Test() {
     canvas.fillStyle =  "red" //"#FF8000"
@@ -73,7 +73,7 @@
           "Koordinaten": Math.floor(Math.random() * (1000))
         }
       });
-    }, 10000);
+    }, 5000);
   }
 
   room.listen("messages/:index", function(change) {
