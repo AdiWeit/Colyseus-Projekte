@@ -61,11 +61,11 @@
     console.log("PC");
   }
 
-  setInterval(Test, 3000)
+  setInterval(Test, 20000)
 
   function Test() {
-  /*  canvas.fillStyle =  "red" //"#FF8000"
-    canvas.fillRect(koordinaten[3],koordinaten[3],100,100); */
+    canvas.fillStyle =  "red" //"#FF8000"
+    canvas.fillRect(koordinaten[3],koordinaten[3],100,100);
     setTimeout(function () {
       room.send({
         message: {
@@ -73,7 +73,7 @@
           "Koordinaten": Math.floor(Math.random() * (1000))
         }
       });
-    }, 1500);
+    }, 10000);
   }
 
   room.listen("messages/:index", function(change) {
@@ -136,8 +136,8 @@
       if (koordinaten[3] <= 0) {
         koordinaten[3] += 3;
       }
-    /*  canvas.fillStyle = "blue"//"#DF7401"
-      canvas.fillRect(koordinaten[3],koordinaten[3],100,100); */
+      canvas.fillStyle = "blue"//"#DF7401"
+      canvas.fillRect(koordinaten[3],koordinaten[3],100,100); 
     }
     if (message.type == undefined && message == spielerIch + " hat gewonnen!!!") {
       console.log("Du hast gewonnen!!!");
