@@ -137,7 +137,7 @@
         koordinaten[3] += 3;
       }
       canvas.fillStyle = "blue"//"#DF7401"
-      canvas.fillRect(koordinaten[3],koordinaten[3],100,100); 
+      canvas.fillRect(koordinaten[3],koordinaten[3],100,100);
     }
     if (message.type == undefined && message == spielerIch + " hat gewonnen!!!") {
       console.log("Du hast gewonnen!!!");
@@ -369,7 +369,7 @@
     else if (zustand[0] == "abgebrochen") {
       zustand[0] = "beendet";
     }
-    if (message == "Es fehlt noch ein Spieler!" == false) {
+    if (message == "Es fehlt noch ein Spieler!" == false && (message.type == undefined == false && message.type == "test" == false) {
       setTimeout(function() {
         Layout();
       }, 700);
