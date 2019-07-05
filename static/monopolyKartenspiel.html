@@ -61,7 +61,7 @@
     console.log("PC");
   }
 
-  setInterval(Test, 1000)
+//  setInterval(Test, 1000)
 
   function Test() {
     canvas.fillStyle =  "red" //"#FF8000"
@@ -509,7 +509,10 @@ function ServerLaden() {
     dbGet("monopolyKartenspiel", "spielstände", function(result) {
       spielstände = result.toString().split(',');
       zählerListe[0] = 0;
-      while (zählerListe[0] < spielstände.length && spielstände[0] == "NOPE" == false) {
+      if (spielstände[0] == "NOPE") {
+        spielstände.pop();
+      }
+      while (zählerListe[0] < spielstände.length) {
       var ul = document.getElementById("spielstände");
       var li = document.createElement("li");
           li.appendChild(document.createTextNode(spielstände[zählerListe[0]]));
