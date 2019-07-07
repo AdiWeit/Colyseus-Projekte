@@ -913,7 +913,6 @@ function scrollWindow() {
             }
             zählerListe[0]++;
           } */
-          if (zählerListe[0] == spieler[spielerIch].kartenMitte.length + 2) {
             zählerListe[1] = 0;
             while (zählerListe[1] < AnzahlSpieler) {
               zählerListe[0] = 0;
@@ -926,7 +925,6 @@ function scrollWindow() {
               }
               zählerListe[1]++;
             }
-          }
           if (zählerListe[1] == AnzahlSpieler + 3 == false) {
             alert("Leider keine Straßen zum Klauen vorhanden! Sie können warten, bis genug Straßen vorhanden sind, oder die Karte als Geld ausspielen.");
             AblageListe[3] = -1;
