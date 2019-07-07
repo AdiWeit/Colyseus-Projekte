@@ -6,7 +6,7 @@ var AblageListe = [];
 var sender = 0;
 var kartenSpieler = [];
 var zählerListe = [];
-var spielerOnline = 0;
+ //var spielerOnline = 0;
 
 export class monopolyKartenspiel extends Room {
   // this room supports only 4 clients connected
@@ -24,15 +24,17 @@ export class monopolyKartenspiel extends Room {
       id: client.sessionId,
       client: client,
     };
-    if (!this.player1) { this.player1 = newPlayer;  }
+    console.log(!this.player1 + " - " + !this.player2 + " - " +!this.player3 + " - " +!this.player4 + " - ")
+    if (!this.player1) { this.player1 = newPlayer;  this.spielerOnline = 0;}
     else if (!this.player2) { this.player2 = newPlayer; }
     else if (!this.player3) { this.player3 = newPlayer; }
     else if (!this.player4) { this.player4 = newPlayer; }
-    spielerOnline++;
+    this.spielerOnline++;
+    console.log("spielerOnline: " + this.spielerOnline);
     if (this.player1 && this.player2) {
       // für mehr als 2 Spieler:    setTimeout( () =>  { },1000);
       console.log("Mehr als 1 Spieler");
-      this.broadcast({ "type": "AnzahlSpieler", "data": spielerOnline });
+      this.broadcast({ "type": "AnzahlSpieler", "data": this.spielerOnline });
       kartenSpieler = [];
       kartenSpieler[0] = [];
       kartenSpieler[1] = [];
@@ -152,7 +154,6 @@ export class monopolyKartenspiel extends Room {
         ["Z Ereigniskarte", "2€", "überweise Geld auf dein Konto, um es zum Bezahen nutzen zu können. ", 2],
         ["Z Ereigniskarte", "1€", "überweise Geld auf dein Konto, um es zum Bezahen nutzen zu können. ", 1],
       ];
-      console.log(kartenZiehen.length);
       // Straßen: Typ, Wert(Geld wenn als Geld benutzt) ,Mieten,StraßenName, StraßenFarbe
       // Event Karten: Typ, Stichwort(z.B. "Los"), ausgeschriebeneFähigkeit, Wert(Geld wenn als Geld benutzt)
       //  T Miete: Typ, Farben, Wert(Geld wenn als Geld benutzt)
@@ -165,21 +166,19 @@ export class monopolyKartenspiel extends Room {
       }
       var karten = [];
       console.log("neu geordnet")
-      console.log(spielerOnline)
-      if (spielerOnline > 2) {
+      if (this.spielerOnline > 2) {
         this.send(this.player3.client, { "type": "spielerDu", "data": 2 });
       }
-      if (spielerOnline > 3) {
+      if (this.spielerOnline > 3) {
         this.send(this.player4.client, { "type": "spielerDu", "data": 3 });
       }
-      var Reihenfolge = Math.floor(Math.random() * spielerOnline);
+      var Reihenfolge = Math.floor(Math.random() * this.spielerOnline);
       this.send(this.player1.client, { "type": "spielerDu", "data": 0 });
       this.send(this.player2.client, { "type": "spielerDu", "data": 1 });
       this.broadcast({ "type": "Reihenfolge", "data": Reihenfolge });
       console.log("Kartenerteilung");
       zählerListe[0] = 0;
-      console.log(spielerOnline);
-      while (zählerListe[0] < spielerOnline) {
+      while (zählerListe[0] < this.spielerOnline) {
 
         while (kartenSpieler[zählerListe[0]].length < 5) {
           if (kartenZiehen[0] == 3) { console.log(3) }
@@ -194,7 +193,7 @@ export class monopolyKartenspiel extends Room {
             } */
       this.broadcast({ "type": "kartenZiehen", "data": kartenZiehen });
       sender = 0;
-      while (sender < spielerOnline) {
+      while (sender < this.spielerOnline) {
         this.broadcast({ "type": "kartenSpieler", "data": kartenSpieler[sender], "sender": sender });
         sender++;
       }
@@ -204,48 +203,47 @@ export class monopolyKartenspiel extends Room {
 
   onLeave(client) {
     //    if (!client.sessionId) {
-    if (spielerOnline == 2 && client.sessionId === this.player1.id)   console.log(`${client.sessionId + "(0)"} left.`);
+    if (this.spielerOnline == 2 && client.sessionId === this.player1.id)   console.log(`${client.sessionId + "(0)"} left.`);
     else console.log(`${client.sessionId + "(1)"} left.`);
     this.broadcast(`${client.sessionId} left`);
-    if (spielerOnline == 4 && client.sessionId === this.player3.id) {
+    if (this.spielerOnline == 4 && client.sessionId === this.player3.id) {
       this.player3 = this.player4;
       console.log("spieler3 weg - aufrücken (4 Spieler)");
       this.player4 = null;
     }
-    if (spielerOnline == 4 && client.sessionId === this.player2.id) {
+    if (this.spielerOnline == 4 && client.sessionId === this.player2.id) {
       console.log("spieler2 weg - aufrücken (4 Spieler)");
       this.player2 = this.player3;
       this.player3 = this.player4;
       this.player4 = null;
     }
-    if (spielerOnline == 4 && client.sessionId === this.player1.id) {
+    if (this.spielerOnline == 4 && client.sessionId === this.player1.id) {
       console.log("spieler1 weg - aufrücken (4 Spieler)");
       this.player1 = this.player2;
       this.player2 = this.player3;
       this.player4 = null;
     }
-    if (spielerOnline == 3 && client.sessionId === this.player2.id) {
+    if (this.spielerOnline == 3 && client.sessionId === this.player2.id) {
       console.log("spieler2 weg- aufrücken (3 Spieler)");
       this.player1 = this.player2;
       this.player2 = this.player3;
     //  this.player3 = null;
     }
-    if (spielerOnline == 3 && client.sessionId === this.player1.id) {
+    if (this.spielerOnline == 3 && client.sessionId === this.player1.id) {
       console.log("spieler1 weg - aufrücken (3 Spieler)");
       this.player1 = this.player2;
       this.player2 = this.player3;
       this.player3 = null;
 }
-  if (spielerOnline == 4 && this.player4 == null == false && client.sessionId === this.player4.id) this.player4 = null;
-  if (spielerOnline == 3 && this.player3 == null == false && client.sessionId === this.player3.id) this.player3 = null;
-  if (spielerOnline == 2 && this.player2 == null == false && client.sessionId === this.player2.id) this.player2 = null;
-  if (spielerOnline == 2 && this.player2 == null == false && client.sessionId === this.player1.id) {this.player1 = this.player2 ; this.player2 = null; }
+  if (this.spielerOnline == 4 && this.player4 == null == false && client.sessionId === this.player4.id) this.player4 = null;
+  if (this.spielerOnline == 3 && this.player3 == null == false && client.sessionId === this.player3.id) this.player3 = null;
+  if (this.spielerOnline == 2 && this.player2 == null == false && client.sessionId === this.player2.id) this.player2 = null;
+  if (this.spielerOnline == 2 && this.player2 == null == false && client.sessionId === this.player1.id) {this.player1 = this.player2 ; this.player2 = null; }
   /*  if (client.sessionId === this.player1.id) this.player1 = null;
     else if (client.sessionId === this.player2.id) this.player2 = null;
     else if (client.sessionId === this.player3.id) this.player3 = null;
     else this.player4 = null; */
-    console.log(spielerOnline);
-    spielerOnline--;
+    this.spielerOnline--;
   /*  if (!this.player2) {
       Reihenfolge = [];
       var j, x, i;
@@ -253,11 +251,12 @@ export class monopolyKartenspiel extends Room {
       sender = 0;
       kartenSpieler = [];
       zählerListe = [];
-      spielerOnline = 0;
+      this.spielerOnline = 0;
     } */
     //  }
-    console.log(spielerOnline + " - " + this.player1 + "/" + this.player2 + "/" + this.player3 + "/" + this.player4 + "/" );
+    console.log(this.spielerOnline + " - " + this.player1 + "/" + this.player2 + "/" + this.player3 + "/" + this.player4 + "/" );
     this.send(this.player1.client, {"type": "reloadPage"});
+    console.log("spielerOnline: " + this.spielerOnline);
   }
 
   onMessage(client, data) {
