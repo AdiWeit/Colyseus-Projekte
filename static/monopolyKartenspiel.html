@@ -334,6 +334,9 @@ function keinenSpielstandLaden() {
       if ((restlicheZüge < 1 || spieler[spielerIch].kartenIch.length < 1) && AblageListe[4][0] == "beendet") {
         Spielerwechsel();
       }
+      setTimeout(function () {
+        zustand[0] = "beendet";
+      }, 2500);
       }
     }
     if (message.Empfänger == spielerIch && message.type == "NixDa" && message.Status[0] == "abgebrochen" == false && message.Status[0] == "richtigerSpielerEmpfangen" == false && zustand[0] == "abgebrochen" == false) {
@@ -388,11 +391,11 @@ function keinenSpielstandLaden() {
           }
         });
       }
-    }, 200);
+    }, 100);
     }
-    else if (zustand[0] == "abgebrochen") {
+  /*  else if (zustand[0] == "abgebrochen") {
       zustand[0] = "beendet";
-    }
+    } */
     if (message == "Es fehlt noch ein Spieler!" == false && (message.type == undefined == false && message.type == "test" == false)) {
       setTimeout(function() {
         Layout();
