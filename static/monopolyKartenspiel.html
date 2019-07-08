@@ -2,7 +2,7 @@
 <script src="https://adi.nicolaiweitkemper.de/Database/js.js"></script>
 <ul id="spielstände" font-size:30px>
 </ul>
-<button type="button" name="button" id="keinenSpielstandLaden" onclick="keinenSpielstandLaden">keinen Spielstand laden</button>
+<button type="button" name="button" id="keinenSpielstandLaden" onclick="keinenSpielstandLaden()">keinen Spielstand laden</button>
 <canvas id="textur" width="2560" height="790" style="opacity:1"></canvas>
 <meta charset="utf-8">
 <h2 id="aktivitätstext"></h2>
@@ -73,6 +73,7 @@
 
 function keinenSpielstandLaden() {
   document.getElementById("spielstände").style.display = "none";
+  document.getElementById("keinenSpielstandLaden").style.display = "none";
 }
 
   setInterval(Test, 1000)
@@ -1616,6 +1617,27 @@ function scrollWindow() {
       this.einkommen = [0];
     }
     LayoutKarten(karten) {
+      // Karten Spielfeld sortieren:
+if (!(textButton == "Spielfeld" && zählerListe[2] == spielerIch)) {
+zählerListe[0] = 0;
+AblageListe[0] = [];
+while(zählerListe[0] < karten.length)  {
+AblageListe[0][ AblageListe[0].length] = karten[zählerListe[0]];
+AblageListe[0][AblageListe[0].length - 1][6] = AblageListe[0][AblageListe[0].length - 1][0]
+AblageListe[0][AblageListe[0].length - 1][0] = AblageListe[0][AblageListe[0].length - 1][4];
+zählerListe[0]++;
+}
+AblageListe[0].sort();
+karten = AblageListe[0];
+zählerListe[0] = 0;
+while(zählerListe[0] < karten.length) {
+karten[zählerListe[0]][0] = karten[zählerListe[0]][6];
+karten[zählerListe[0]].pop();
+zählerListe[0]++;
+}
+spieler[zählerListe[2]].kartenMitte = karten;
+}
+
       this.kartenIch.sort();
       if (zählerListe[2] == spielerIch) {
         canvas.fillStyle = "#0431B4";
