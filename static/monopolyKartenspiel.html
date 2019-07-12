@@ -519,6 +519,7 @@ function keinenSpielstandLaden() {
   function serverDatenLöschen() {
     if (AblageListe[9] == undefined == false) {
       dbSet("monopolyKartenspiel", AblageListe[9] + " spieler", "NOPE");
+      setTimeout(function () {
       dbSet("monopolyKartenspiel", AblageListe[9] + " kartenZiehen", "NOPE");
       zählerListe[0] = 0;
       dbGet("monopolyKartenspiel", "spielstände", function(result) {
@@ -526,11 +527,14 @@ function keinenSpielstandLaden() {
       while (zählerListe[0] < spielstände.length) {
         if (spielstände[zählerListe[0]] == AblageListe[9]) {
           spielstände.splice([zählerListe[0]], 1);
-          dbSet("monopolyKartenspiel", "spielstände", spielstände);
+          setTimeout(function () {
+            dbSet("monopolyKartenspiel", "spielstände", spielstände);
+          }, 500);
         }
         zählerListe[0]++;
       }
     });
+    }, 500);
     }
   }
 function ServerLaden() {
@@ -588,7 +592,7 @@ function ServerLaden() {
                         spieler[3] = JSON.parse(result)[3]; */
                           console.log(spieler);
                             dbGet("monopolyKartenspiel",AblageListe[9] + " kartenZiehen" , function(result) {
-                              kartenZiehen = result.toString().split(',');
+                              kartenZiehen = JSON.parse(result);
                               dbGet("monopolyKartenspiel",AblageListe[9] + AblageListe[0] + " 1-stellige" , function(result) {
                                 restlicheZüge = JSON.parse(result.toString().split(',')[2]);
                                 spielerGegner = JSON.parse(result.toString().split(',')[1]);
@@ -596,6 +600,7 @@ function ServerLaden() {
                                spielerAktuell = JSON.parse(result.toString().split(',')[3]);
                                 window.scroll(0,73);
                                 document.getElementById("keinenSpielstandLaden").style.display = "none";
+                                document.getElementById("spielstände").style.display = "none";
                                 Layout();
                               });
                             });
@@ -946,39 +951,6 @@ function scrollWindow() {
           }
         }
         }
-        if (spieler[spielerIch].kartenIch[AblageListe[2]][1] == "Übernahme") {
-          zählerListe[0] = 0;
-          AblageListe[0] = -1;
-          while (zählerListe[0] < AnzahlSpieler) {
-            zählerListe[1] = 0;
-            if (zählerListe[0] == spielerIch == false) {
-            while (zählerListe[1] < spieler[zählerListe[0]].kartenMitte.length) {
-              if (spieler[zählerListe[0]].kartenMitte[zählerListe[1]][2].length == spieler[zählerListe[0]].kartenMitte[zählerListe[1]][5].length) {
-                AblageListe[0]++;
-              }
-              zählerListe[1]++;
-
-            }
-            }
-            zählerListe[0]++;
-          }
-          if (AblageListe[0] == -1) {
-            alert("Keine Karte für eine Übernahme verfügbar!");
-            AblageListe[3] = - 1;
-          }
-          if (AnzahlSpieler == 2 && spieler[spielerGegner].kartenMitte.length == 1 && spieler[spielerGegner].kartenMitte[0][5].length == spieler[spielerGegner].kartenMitte[0][2].length) {
-            AblageListe[3] = spielerGegner;
-            if (spieler[AblageListe[3]].kartenIch.some(x => x.includes("Nix Da"))) {
-              AblageListe[2] = 0;
-              AblageListe[4][0] = "eine Übernahme Karte";
-            } else {
-              uebernahme();
-            }
-          } else {
-            AblageListe[4][0] = spieler[spielerIch].kartenIch[AblageListe[2]][1];
-            textButton = "Meine Karten";
-          }
-        }
         if (spieler[spielerIch].kartenIch[AblageListe[2]][1] == "Zwangs- tausch") {
           zählerListe[0] = 0;
           while (zählerListe[0] < spieler[spielerIch].kartenMitte.length) {
@@ -1157,6 +1129,39 @@ function scrollWindow() {
                 AblageListe[4][1] = spieler[spielerIch].kartenIch[AblageListe[2]][1];
               } */
         }
+        if (spieler[spielerIch].kartenIch[AblageListe[2]][1] == "Übernahme") {
+          zählerListe[0] = 0;
+          AblageListe[0] = -1;
+          while (zählerListe[0] < AnzahlSpieler) {
+            zählerListe[1] = 0;
+            if (zählerListe[0] == spielerIch == false) {
+            while (zählerListe[1] < spieler[zählerListe[0]].kartenMitte.length) {
+              if (spieler[zählerListe[0]].kartenMitte[zählerListe[1]][2].length == spieler[zählerListe[0]].kartenMitte[zählerListe[1]][5].length) {
+                AblageListe[0]++;
+              }
+              zählerListe[1]++;
+
+            }
+            }
+            zählerListe[0]++;
+          }
+          if (AblageListe[0] == -1) {
+            alert("Keine Karte für eine Übernahme verfügbar!");
+            AblageListe[3] = - 1;
+          }
+          if (AnzahlSpieler == 2 && spieler[spielerGegner].kartenMitte.length == 1 && spieler[spielerGegner].kartenMitte[0][5].length == spieler[spielerGegner].kartenMitte[0][2].length) {
+            AblageListe[3] = spielerGegner;
+            if (spieler[AblageListe[3]].kartenIch.some(x => x.includes("Nix Da"))) {
+              AblageListe[2] = 0;
+              AblageListe[4][0] = "eine Übernahme Karte";
+            } else {
+              uebernahme();
+            }
+          } else {
+            AblageListe[4][0] = spieler[spielerIch].kartenIch[AblageListe[2]][1];
+            textButton = "Meine Karten";
+          }
+        }
       }
       if (AblageListe[3] > -1) {
         restlicheZüge--;
@@ -1192,10 +1197,15 @@ function scrollWindow() {
   function datenAktuallisieren() {
     if (spieler[AnzahlSpieler - 1].name == undefined == false) {
       dbSet("monopolyKartenspiel", nameSpiel + " spieler", JSON.stringify(spieler));
+    //  dbSet("monopolyKartenspiel", nameSpiel + " kartenZiehen", JSON.stringify(kartenZiehen));
+      dbSet("monopolyKartenspiel", nameSpiel + spieler[spielerIch].name + " 1-stellige", [spielerIch, spielerGegner, restlicheZüge, spielerAktuell]);
       setTimeout(function () {
-      dbSet("monopolyKartenspiel", nameSpiel + " kartenZiehen", kartenZiehen);
-      /* neu */        dbSet("monopolyKartenspiel", nameSpiel + spieler[spielerIch].name + " 1-stellige", [spielerIch, spielerGegner, restlicheZüge, spielerAktuell]);
-    }, 500);
+      dbSet("monopolyKartenspiel", nameSpiel + " kartenZiehen", JSON.stringify(kartenZiehen));
+      setTimeout(function () {
+        dbSet("monopolyKartenspiel", nameSpiel + spieler[spielerIch].name + " 1-stellige", [spielerIch, spielerGegner, restlicheZüge, spielerAktuell]);
+      }, 1500);
+      /* neu */
+    }, 1500);
     }
     zählerListe[0] = 0;
     room.send({
