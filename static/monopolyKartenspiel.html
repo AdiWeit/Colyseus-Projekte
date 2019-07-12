@@ -39,6 +39,7 @@
   var host = window.document.location.host.replace(/:.*/, '');
   var client = new Colyseus.Client(location.protocol.replace("http", "ws") + host + (location.port ? ':' + location.port : ''));
   var room = client.join("monopolyKartenspiel");
+  /* new */ var fs = require('fs');
 
   var gerät;
 
@@ -539,7 +540,9 @@ function keinenSpielstandLaden() {
   }
 function ServerLaden() {
     dbGet("monopolyKartenspiel", "spielstände", function(result) {
-      spielstände = result.toString().split(',');
+    //  spielstände = result.toString().split(',');
+    console.log(JSON.parse(fs.readFileSync('words.json')));
+    spielstände = JSON.parse(fs.readFileSync('words.json'))["spielstände"];
       zählerListe[0] = 0;
       if (spielstände[0] == "NOPE") {
         spielstände.pop();
@@ -1196,6 +1199,7 @@ function scrollWindow() {
 
   function datenAktuallisieren() {
     if (spieler[AnzahlSpieler - 1].name == undefined == false) {
+      fs.writeFile('words.json', (nameSpiel + " spieler"): JSON.stringify(spieler, null, 2), finishedSave);
       dbSet("monopolyKartenspiel", nameSpiel + " spieler", JSON.stringify(spieler));
     //  dbSet("monopolyKartenspiel", nameSpiel + " kartenZiehen", JSON.stringify(kartenZiehen));
       dbSet("monopolyKartenspiel", nameSpiel + spieler[spielerIch].name + " 1-stellige", [spielerIch, spielerGegner, restlicheZüge, spielerAktuell]);
@@ -1240,6 +1244,9 @@ function scrollWindow() {
       zählerListe[0]++;
     }
     Layout();
+  }
+  function finishedSave (err) {
+    alert("Ihre Daten wurden gespeichert!");
   }
 
   function MieteAlle() {
