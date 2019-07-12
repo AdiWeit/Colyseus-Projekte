@@ -544,7 +544,7 @@ function ServerLaden() {
     console.log(JSON.parse(fs.readFileSync('words.json')));
     spielstände = JSON.parse(fs.readFileSync('words.json'))["spielstände"];
       zählerListe[0] = 0;
-      if (spielstände[0] == "NOPE") {
+      if (spielstände[0] == "NOPE" || spielstände[0] == undefined) {
         spielstände.pop();
         document.getElementById("keinenSpielstandLaden").style.display = "none";
         window.scroll(0,73);
@@ -1199,7 +1199,7 @@ function scrollWindow() {
 
   function datenAktuallisieren() {
     if (spieler[AnzahlSpieler - 1].name == undefined == false) {
-      fs.writeFile('words.json', (nameSpiel + " spieler"): JSON.stringify(spieler, null, 2), finishedSave);
+      fs.writeFile('words.json', nameSpiel + " spieler": JSON.stringify(spieler, null, 2), finishedSave);
       dbSet("monopolyKartenspiel", nameSpiel + " spieler", JSON.stringify(spieler));
     //  dbSet("monopolyKartenspiel", nameSpiel + " kartenZiehen", JSON.stringify(kartenZiehen));
       dbSet("monopolyKartenspiel", nameSpiel + spieler[spielerIch].name + " 1-stellige", [spielerIch, spielerGegner, restlicheZüge, spielerAktuell]);
