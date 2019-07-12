@@ -1199,7 +1199,7 @@ function scrollWindow() {
 
   function datenAktuallisieren() {
     if (spieler[AnzahlSpieler - 1].name == undefined == false) {
-      AblageListe[0] = {(nameSpiel + " spieler"): JSON.stringify(spieler, null, 2)}
+      AblageListe[0] = {nameSpiel + " spieler": JSON.stringify(spieler, null, 2)};
       fs.writeFile('words.json',AblageListe[0] , finishedSave);
       dbSet("monopolyKartenspiel", nameSpiel + " spieler", JSON.stringify(spieler));
     //  dbSet("monopolyKartenspiel", nameSpiel + " kartenZiehen", JSON.stringify(kartenZiehen));
