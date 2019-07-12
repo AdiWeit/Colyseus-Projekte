@@ -1215,6 +1215,9 @@ function scrollWindow() {
   // console.log(JSON.parse(localStorage.getItem("Test"));
   function datenAktuallisieren() {
     if (spieler[AnzahlSpieler - 1].name == undefined == false) {
+      if (!(angular.equals(JSON.parse(localStorage.getItem("spielstände")), spielstände))) {
+        localStorage.setItem("spielstände", JSON.stringify(spielstände));
+      }
       localStorage.setItem(AblageListe[9] + " kartenZiehen", JSON.stringify(kartenZiehen));
       localStorage.setItem(AblageListe[9] + " spieler", JSON.stringify(spieler));
   //    dbSet("monopolyKartenspiel", AblageListe[9] + " spieler", JSON.stringify(spieler));
