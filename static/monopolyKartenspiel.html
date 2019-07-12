@@ -39,7 +39,7 @@
   var host = window.document.location.host.replace(/:.*/, '');
   var client = new Colyseus.Client(location.protocol.replace("http", "ws") + host + (location.port ? ':' + location.port : ''));
   var room = client.join("monopolyKartenspiel");
-  /* new */ var fs = require('fs');
+
 
   var gerät;
 
@@ -127,7 +127,8 @@ function keinenSpielstandLaden() {
             spielstände = result.toString().split(',');
           }
         spielstände[spielstände.length] = nameSpiel;
-        dbSet("monopolyKartenspiel", "spielstände", spielstände);
+      //  dbSet("monopolyKartenspiel", "spielstände", spielstände);
+        localStorage.setItem("spielstände", JSON.stringify(spielstände));
         });
       }
       else {
@@ -211,8 +212,7 @@ function keinenSpielstandLaden() {
           else {
             window.scroll(0,0);
           }
-        }
-      }, 300);
+        }}, 300);
       new Audio("http://www.orangefreesounds.com/wp-content/uploads/2019/03/Elevator-ding-dong-sound-effect.mp3").play();
     }
     if (message.type == "spielerDu") spielerIch = message.data;
@@ -539,16 +539,14 @@ function keinenSpielstandLaden() {
     }
   }
 function ServerLaden() {
-    dbGet("monopolyKartenspiel", "spielstände", function(result) {
+  //  dbGet("monopolyKartenspiel", "spielstände", function(result) {
     //  spielstände = result.toString().split(',');
-  //  console.log(JSON.parse(fs.readFileSync('words.json')));
-      console.log(fs.readFileSync('dataBase.json'));
-  //  spielstände = JSON.parse(fs.readFileSync('words.json'))["spielstände"];
+      spielstände = JSON.parse(localStorage.getItem("spielstände"));
       zählerListe[0] = 0;
-      if (spielstände[0] == "NOPE" || spielstände[0] == undefined) {
-        spielstände.pop();
+      if (spielstände == null || spielstände.length < 1) {
         document.getElementById("keinenSpielstandLaden").style.display = "none";
         window.scroll(0,73);
+        spielstände = [];
       }
       else {
         window.scroll(0,0);
@@ -579,15 +577,15 @@ function ServerLaden() {
                       liIndex = tab.indexOf(this.innerHTML);
                       console.log(spielstände[liIndex]);
                       AblageListe[9] = spielstände[liIndex]
-                      dbGet("monopolyKartenspiel",AblageListe[9] + " spieler" , function(result) {
-                        if (JSON.parse(result)[0].name == AblageListe[0] || JSON.parse(result)[1].name == AblageListe[0] || (JSON.parse(result)[2].name == undefined == false && JSON.parse(result)[2].name == AblageListe[0]) || (JSON.parse(result)[3].name == undefined == false && JSON.parse(result)[3].name == AblageListe[0])) {
-                        //  spieler = JSON.parse(result);
+                //      dbGet("monopolyKartenspiel",AblageListe[9] + " spieler" , function(result) {
+                        if (JSON.parse(localStorage.getItem(AblageListe[9] + " spieler"))[0].name == AblageListe[0] || JSON.parse(localStorage.getItem(AblageListe[9] + " spieler"))[1].name == AblageListe[0] || (JSON.parse(localStorage.getItem(AblageListe[9] + " spieler"))[2].name == undefined == false && JSON.parse(localStorage.getItem(AblageListe[9] + " spieler"))[2].name == AblageListe[0]) || (JSON.parse(localStorage.getItem(AblageListe[9] + " spieler"))[3].name == undefined == false && JSON.parse(localStorage.getItem(AblageListe[9] + " spieler"))[3].name == AblageListe[0])) {
+                        //  spieler = JSON.parse(localStorage.getItem(AblageListe[9] + " spieler"));
                         zählerListe[0] = 0;
                         while (zählerListe[0] < 4) {
-                          spieler[zählerListe[0]].einkommen = JSON.parse(result)[zählerListe[0]].einkommen;
-                          spieler[zählerListe[0]].kartenIch = JSON.parse(result)[zählerListe[0]].kartenIch;
-                          spieler[zählerListe[0]].kartenMitte = JSON.parse(result)[zählerListe[0]].kartenMitte;
-                          spieler[zählerListe[0]].name = JSON.parse(result)[zählerListe[0]].name;
+                          spieler[zählerListe[0]].einkommen = /*JSON.parse(result)*/JSON.parse(localStorage.getItem(AblageListe[9] + " spieler"))[zählerListe[0]].einkommen;
+                          spieler[zählerListe[0]].kartenIch = /*JSON.parse(result)*/JSON.parse(localStorage.getItem(AblageListe[9] + " spieler"))[zählerListe[0]].kartenIch;
+                          spieler[zählerListe[0]].kartenMitte = /*JSON.parse(result)*/JSON.parse(localStorage.getItem(AblageListe[9] + " spieler"))[zählerListe[0]].kartenMitte;
+                          spieler[zählerListe[0]].name = /*JSON.parse(result)*/JSON.parse(localStorage.getItem(AblageListe[9] + " spieler"))[zählerListe[0]].name;
                           zählerListe[0]++;
                         }
                   /*      spieler[0] = JSON.parse(result)[0];
@@ -596,7 +594,7 @@ function ServerLaden() {
                         spieler[3] = JSON.parse(result)[3]; */
                           console.log(spieler);
                             dbGet("monopolyKartenspiel",AblageListe[9] + " kartenZiehen" , function(result) {
-                              kartenZiehen = JSON.parse(result);
+                              kartenZiehen = /*JSON.parse(result)*/JSON.parse(localStorage.getItem(AblageListe[9] + " kartenZiehen"));
                               dbGet("monopolyKartenspiel",AblageListe[9] + AblageListe[0] + " 1-stellige" , function(result) {
                                 restlicheZüge = JSON.parse(result.toString().split(',')[2]);
                                 spielerGegner = JSON.parse(result.toString().split(',')[1]);
@@ -612,11 +610,11 @@ function ServerLaden() {
                         else {
                           alert("Ihr Name ist in der gespeicherten Datei nicht vorhanden!")
                         }
-                          });
+                        //  });
                   };
 
               }
-      });
+    //  });
 }
   AblageListe[10] = "none"
   function readMouseMove(e) {
@@ -1197,18 +1195,20 @@ function scrollWindow() {
         } */
         Layout();
   });
-
+  // localStorage.setItem("Test", JSON.stringify([1,2,3]));
+  // console.log(JSON.parse(localStorage.getItem("Test"));
   function datenAktuallisieren() {
     if (spieler[AnzahlSpieler - 1].name == undefined == false) {
-  /*    AblageListe[0] = {nameSpiel + " spieler": JSON.stringify(spieler, null, 2)}; */
-      fs.writeFile('dataBase.json',/*AblageListe[0]*/"Test" , finishedSave);
-      dbSet("monopolyKartenspiel", nameSpiel + " spieler", JSON.stringify(spieler));
+      localStorage.setItem(nameSpiel + " kartenZiehen", JSON.stringify(kartenZiehen));
+      localStorage.setItem(nameSpiel + " spieler", JSON.stringify(spieler));
+  //    dbSet("monopolyKartenspiel", nameSpiel + " spieler", JSON.stringify(spieler));
     //  dbSet("monopolyKartenspiel", nameSpiel + " kartenZiehen", JSON.stringify(kartenZiehen));
-      dbSet("monopolyKartenspiel", nameSpiel + spieler[spielerIch].name + " 1-stellige", [spielerIch, spielerGegner, restlicheZüge, spielerAktuell]);
+    localStorage.setItem(nameSpiel + spieler[spielerIch].name + " 1-stellige", JSON.stringify([spielerIch, spielerGegner, restlicheZüge, spielerAktuell]));
+  //    dbSet("monopolyKartenspiel", nameSpiel + spieler[spielerIch].name + " 1-stellige", [spielerIch, spielerGegner, restlicheZüge, spielerAktuell]);
       setTimeout(function () {
-      dbSet("monopolyKartenspiel", nameSpiel + " kartenZiehen", JSON.stringify(kartenZiehen));
+  //    dbSet("monopolyKartenspiel", nameSpiel + " kartenZiehen", JSON.stringify(kartenZiehen));
       setTimeout(function () {
-        dbSet("monopolyKartenspiel", nameSpiel + spieler[spielerIch].name + " 1-stellige", [spielerIch, spielerGegner, restlicheZüge, spielerAktuell]);
+    //    dbSet("monopolyKartenspiel", nameSpiel + spieler[spielerIch].name + " 1-stellige", [spielerIch, spielerGegner, restlicheZüge, spielerAktuell]);
       }, 1500);
       /* neu */
     }, 1500);
