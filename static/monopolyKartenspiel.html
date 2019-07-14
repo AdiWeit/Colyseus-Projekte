@@ -1,5 +1,6 @@
 <script type="text/javascript" src="colyseus.js"></script>
 <script src="https://adi.nicolaiweitkemper.de/Database/js.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
 <ul id="spielstände" font-size:30px>
 </ul>
 <button type="button" name="button" id="keinenSpielstandLaden" onclick="keinenSpielstandLaden()">keinen Spielstand laden</button>
@@ -39,6 +40,10 @@
   var host = window.document.location.host.replace(/:.*/, '');
   var client = new Colyseus.Client(location.protocol.replace("http", "ws") + host + (location.port ? ':' + location.port : ''));
   var room = client.join("monopolyKartenspiel");
+
+var items;
+var tab = [];
+var liIndex;
 
 
   var gerät;
@@ -116,6 +121,11 @@ function keinenSpielstandLaden() {
       spieler[2].name = message.data.toString().split(',')[2];
       spieler[3].name = message.data.toString().split(',')[3];
 }
+    if (message.type == "spielstände") {spielstände = message.data;  localStorage.setItem("spielstände", JSON.stringify(spielstände));AblageListe[9] = nameSpiel;}
+    if (message.type == "ReihenfolgeSpielstandLaden") {
+      spielerAktuell = message.data;
+      AblageListe[1] = "ReihenfolgeSpielstandLaden";
+    }
     if (message.type == "namenSpieler") {
       alert("Das Spiel wurde unter dem Namen " + message.data + " gespeichert.");
       nameSpiel = message.data;
@@ -140,7 +150,12 @@ function keinenSpielstandLaden() {
             "data": [spieler[0].name, spieler[1].name, spieler[2].name, spieler[3].name]
           }
         });
-      //  });
+        room.send({
+          message: {
+            "type": "spielstände",
+            "data": spielstände
+          }
+        });
       }
       else {
         room.send({
@@ -576,8 +591,8 @@ function ServerLaden() {
         zählerListe[0]++;
       }
 
-      var items = document.querySelectorAll("#spielstände"),
-          tab = [], liIndex;
+          items = document.querySelectorAll("#spielstände li")
+          tab = [];
 
 
               for(i = 0; i < items.length; i++){
@@ -615,7 +630,40 @@ function ServerLaden() {
                                 restlicheZüge = JSON.parse(localStorage.getItem(AblageListe[9] + AblageListe[0] + " 1-stellige"))[2];
                                 spielerGegner = JSON.parse(localStorage.getItem(AblageListe[9] + AblageListe[0] + " 1-stellige"))[1];
                                 spielerIch    = JSON.parse(localStorage.getItem(AblageListe[9] + AblageListe[0] + " 1-stellige"))[0];
-                               spielerAktuell = JSON.parse(localStorage.getItem(AblageListe[9] + AblageListe[0] + " 1-stellige"))[3];
+                                if (AblageListe[1] == "ReihenfolgeSpielstandLaden" == false) {
+                                  spielerAktuell = JSON.parse(localStorage.getItem(AblageListe[9] + AblageListe[0] + " 1-stellige"))[3];
+                                }
+                                else {
+                                  setTimeout(function () {
+                                    AblageListe[1] = "beendet";
+                                  }, 1000);
+                                }
+                                 zählerListe[0] = 0;
+                                 zählerListe[3] = -1;
+                                 while (zählerListe[0] < AnzahlSpieler) {
+                                   if (JSON.parse(localStorage.getItem(AblageListe[9] + spieler[zählerListe[0]].name + " 1-stellige"))[2] > 0 && JSON.parse(localStorage.getItem(AblageListe[9] + spieler[zählerListe[0]].name + " 1-stellige"))[2] < 3) {
+                                     zählerListe[3] = zählerListe[0];
+                                   }
+                                   zählerListe[0]++;
+                                 }
+                                 if (JSON.parse(localStorage.getItem(AblageListe[9] + spieler[spielerAktuell].name + " 1-stellige"))[2] == 0) {
+                                     Spielerwechsel();
+                                    room.send({
+                                      message: {
+                                        "type": "ReihenfolgeSpielstandLaden",
+                                        "data": spielerAktuell
+                                      }
+                                    });
+                                 }
+                                 if (zählerListe[3] > -1 && zählerListe[3] == spielerAktuell == false && AblageListe[1] == "ReihenfolgeSpielstandLaden" == false) {
+                                   spielerAktuell = zählerListe[3];
+                                   room.send({
+                                     message: {
+                                       "type": "ReihenfolgeSpielstandLaden",
+                                       "data": spielerAktuell
+                                     }
+                                   });
+                                 }
                                 window.scroll(0,73);
                                 document.getElementById("keinenSpielstandLaden").style.display = "none";
                                 document.getElementById("spielstände").style.display = "none";
@@ -1215,9 +1263,6 @@ function scrollWindow() {
   // console.log(JSON.parse(localStorage.getItem("Test"));
   function datenAktuallisieren() {
     if (spieler[AnzahlSpieler - 1].name == undefined == false) {
-      if (!(angular.equals(JSON.parse(localStorage.getItem("spielstände")), spielstände))) {
-        localStorage.setItem("spielstände", JSON.stringify(spielstände));
-      }
       localStorage.setItem(AblageListe[9] + " kartenZiehen", JSON.stringify(kartenZiehen));
       localStorage.setItem(AblageListe[9] + " spieler", JSON.stringify(spieler));
   //    dbSet("monopolyKartenspiel", AblageListe[9] + " spieler", JSON.stringify(spieler));
