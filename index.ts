@@ -14,6 +14,7 @@ import { SchereSteinPapierRoom } from "./rooms/SchereSteinPapier";
 import { vierGewinntRoom } from "./rooms/4gewinnt";
 import { heldenDesOlympRoom } from "./rooms/heldenDesOlymp";
 import { monopolyKartenspiel } from "./rooms/monopolyKartenspiel";
+import { snakeGame } from "./rooms/snakeGame";
 // import { hindernisFliegen } from "./rooms/hindernisFliegen";
 // import { Test } from "./rooms/Test";
 
@@ -50,6 +51,8 @@ gameServer.register("4gewinnt", vierGewinntRoom);
 gameServer.register("heldenDesOlymp", heldenDesOlympRoom);
 
 gameServer.register("monopolyKartenspiel", monopolyKartenspiel);
+
+gameServer.register("snakeGame", snakeGame);
 
 // gameServer.register("Test", Test);
 

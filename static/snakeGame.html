@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<button type="button" name="button" onclick="rundeStarten()" id="rundeStarten">bereit für Rundenbeginn</button>
+<html lang="">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team S.C.R.I.P.T.</title>
+    <style> body {padding: 0; margin: 0;} </style>
+    <script src="http://adi.nicolaiweitkemper.de/p5/p5.min.js"></script>
+    <script src="http://adi.nicolaiweitkemper.de/p5/addons/p5.dom.min.js"></script>
+    <script src="http://adi.nicolaiweitkemper.de/p5/addons/p5.sound.min.js"></script>
+    <script type="text/javascript" src="colyseus.js"></script>
+  </head>
+  <body>
+  </body>
+</html>
+
+<script>
+
+var AblageListe = [];
+    AblageListe[1] = [];
+var zählerListe = [];
+var AnzahlSpieler = 1;
+var spielerIch = 0;
+var iDirectionInterval;
+
+var host = window.document.location.host.replace(/:.*/, '');
+var client = new Colyseus.Client(location.protocol.replace("http", "ws") + host + (location.port ? ':' + location.port : ''));
+var room = client.join("snakeGame");
+
+document.getElementById('rundeStarten').style.display = "none";
+setTimeout(function () {
+//  if (spielerIch == 1) {
+    setup();
+//  }
+  canvas.style.display = "none";
+}, 1000);
+
+room.listen("messages/:index", function(change) {
+  console.log("CHANGE!", change);
+});
+
+room.onJoin.add(function() {
+  console.log("joined");
+});
+
+room.onStateChange.addOnce(function(state) {
+  console.log("initial room state:", state);
+});
+
+// new room state
+room.onStateChange.add(function(state) {
+  // this signal is triggered on each patch
+});
+
+  room.onMessage.add(function(message) {
+    if (message.type == "2playersGetReady") {
+      document.getElementById('rundeStarten').style.display = "inline";
+    }
+    if (message.type == "arrayPlayerReady") {
+      AblageListe[1] = message.data;
+      if (AblageListe[1].length == AnzahlSpieler) {
+        canvas.style.display = "inline";
+        document.getElementById('rundeStarten').style.display = "none";
+        if (spielerIch == 0) {
+          setInterval(syncroS, 100);
+        }
+        if (spielerIch == 1) {
+          iDirectionInterval = setInterval(moveI, /*sameSpeed: 100*/17 + ((1580 - x))/93);
+      //    setInterval(syncroI, 100);
+        }
+      }
+    }
+    if (message.type == "a player left!") location.reload();
+    if (message.type == "AnzahlSpieler") AnzahlSpieler = message.data;
+    if (message.type == "spielerDu") {spielerIch = message.data;console.log("spielerIch aktuallisiert! " + spielerIch)}
+    if (message.Empfänger == spielerIch && message.type == "s") {
+      zählerListe[0] = 0;
+      while (zählerListe[0] < 5) {
+        s[Object.keys(s)[zählerListe[0]]] = message.data[zählerListe[0]];
+        zählerListe[0]++;
+      }
+      zählerListe[0] = 0;
+      s.tail = [];
+      while (zählerListe[0] < (message.data[5][0].length + 1)) {
+        if (message.data[5][0][zählerListe[0]] == undefined == false) {
+          s.tail[zählerListe[0]] = message.data[5][0][zählerListe[0]];
+        }
+        zählerListe[0]++;
+      }
+  /*    if (message.data[5][1] == undefined == false) {
+        s.tail[-1] = message.data[5][1];
+      } */
+      food.x = message.data[6][0];
+      food.y = message.data[6][1];
+      food.z = message.data[6][2];
+      if (message.Empfänger < (AnzahlSpieler - 1)) {
+          room.send({
+            message: {
+              "type": "s",
+              "data": s,
+              "Empfänger": (message.Empfänger + 1)
+            }
+          });
+    }
+  }
+  if (message.type == "i") {
+    i.x = message.data[0];
+    i.y = message.data[1];
+    food.x = message.data[2];
+    food.y = message.data[3];
+    draw();
+  }
+  });
+
+  function rundeStarten() {
+    if (!(document.getElementById('rundeStarten').innerHTML == "Warten auf Gegner")) {
+      document.getElementById('rundeStarten').innerHTML = "Warten auf Gegner";
+      AblageListe[1][AblageListe[1].length] = "ready!"
+      room.send({
+        message: {
+          "type": "arrayPlayerReady",
+          "data": AblageListe[1]
+        }
+      });
+    }
+  }
+
+  if (true) {
+    var w = window,
+        d = document,
+        e = d.documentElement,
+        g = d.getElementsByTagName('body')[0],
+        x = w.innerWidth || e.clientWidth || g.clientWidth,
+        y = w.innerHeight|| e.clientHeight|| g.clientHeight;
+        while ((x/20 + "").length > 2 && x > 0) {
+          x--;
+        }
+        while ((y/20 + "").length > 2 && y > 0) {
+          y--;
+        }
+  }
+  console.log(x + ' × ' + y);
+  			function viewPage () {
+  				var el = document.body;
+  				toggleFullscreen(el);
+  			};
+
+  			function viewImage () {
+  				var el = canvas/*document.getElementById('myImage');*/
+  				toggleFullscreen(el);
+  			};
+
+  			function toggleFullscreen (el) {
+  		/*		if(document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement){
+  					if(document.exitFullscreen){
+  					//	document.exitFullscreen();
+  					}else if(document.mozCancelFullScreen){
+  				//		document.mozCancelFullScreen();
+  					}else if(document.webkitExitFullscreen){
+  				//		document.webkitExitFullscreen();
+  					}else if(document.msExitFullscreen){
+  				//		document.msExitFullscreen();
+  					}
+  				}else{*/
+  					if(document.documentElement.requestFullscreen){
+  						el.requestFullscreen();
+  					}else if(document.documentElement.mozRequestFullScreen){
+  						el.mozRequestFullScreen();
+  					}else if(document.documentElement.webkitRequestFullscreen){
+  						el.webkitRequestFullscreen();
+  					}else if(document.documentElement.msRequestFullscreen){
+  						el.msRequestFullscreen();
+  					}
+  			//	}
+  			};
+
+
+  // sketch.js
+  var s;
+  var scl=20;
+  var food;
+
+  function setup() {
+    createCanvas(x,y);
+    s=new Snake();
+    i=new insect();
+    frameRate(10);
+    pickLocation();
+  }
+
+  function pickLocation()
+  {
+  	var cols=floor(width/scl);
+  	var rows=floor(height/scl);
+  	food=createVector(floor(random(cols)),floor(random(rows)));
+  	food.mult(scl);
+  }
+
+  function draw() {
+    background(51);
+    if(spielerIch == 0 && s.eat(food))
+    {
+    	pickLocation();
+    }
+    if (spielerIch == 0) {
+      s.death();
+      s.update();
+    }
+    if (spielerIch == 1) {
+      i.death();
+    }
+    s.show();
+
+    fill(255,0,100);
+    rect(food.x,food.y,scl,scl);
+    fill(110, 100, 110)
+    rect(i.x, i.y,scl,scl);
+  }
+  function keyPressed()
+  {
+    viewImage();
+  	if(keyCode === UP_ARROW)
+  	{
+      if (spielerIch == 0) s.dir(0,-1);
+  	}
+  	else if (keyCode===DOWN_ARROW)
+  	{
+      if (spielerIch == 0) s.dir(0,1);
+  	}
+  	else if (keyCode===RIGHT_ARROW)
+  	{
+      if (spielerIch == 0) s.dir(1,0);
+    }
+  	else if (keyCode===LEFT_ARROW)
+  	{
+      if (spielerIch == 0) s.dir(-1,0);
+    }
+    if (spielerIch == 1 && (keyCode===DOWN_ARROW || keyCode===UP_ARROW || keyCode===RIGHT_ARROW || keyCode===LEFT_ARROW)) {
+      i.direction = i.directionObj[keyCode];
+    }
+  }
+
+function insect() {
+  AblageListe[0] = 0;
+  while (AblageListe[0]*20 < canvas.width/2 && AblageListe[0]*20 < canvas.width) {
+    AblageListe[0]++;
+  }
+  this.x = ((floor(AblageListe[0]))*20) - 60;
+  AblageListe[0] = 0;
+  while (AblageListe[0]*20 < canvas.height/2 && AblageListe[0]*20 < canvas.height) {
+    AblageListe[0]++;
+  }
+  this.y = ((floor(AblageListe[0]))*20)-60;
+  this.direction = "RIGHT_ARROW";
+  this.opositeDirection = {"UP_ARROW": "DOWN_ARROW", "RIGHT_ARROW": "LEFT_ARROW", "DOWN_ARROW": "UP_ARROW", "LEFT_ARROW": "RIGHT_ARROW"}
+  this.directionObj = {38: "UP_ARROW", 40: "DOWN_ARROW", 39: "RIGHT_ARROW", 37: "LEFT_ARROW"};
+  this.isDead = [false];
+
+  this.death= function() {
+    if (this.x > canvas.width - scl) {
+      this.isDead[1] = "left";
+    }
+    else if (this.y > canvas.height - 20) {
+      this.isDead[1] = "up";
+    }
+    else if (this.y < 0) {
+      this.isDead[1] = "down";
+    }
+    else if (this.x < 0) {
+      this.isDead[1] = "right";
+    }
+    if (this.x > canvas.width - scl || this.y > canvas.height - 20 || this.y < 0 || this.x < 0) {
+      console.log("deathInsect (Rand)");
+      this.isDead[0] = true;
+    }
+    if (dist(this.x, this.y, food.x, food.y) == 0) {
+      console.log("eatFood");
+      pickLocation();
+    }
+    if (this.isDead[0] == true) {
+      this.isDead[0] = false;
+      if (this.isDead[1] == "left") {
+        this.x -= 20;
+      }
+      else if (this.isDead[1] == "right") {
+        this.x += 20;
+      }
+      else if (this.isDead[1] == "up") {
+        this.y -= 20;
+      }
+      else {
+        this.y += 20;
+      }
+      if (this.isDead[1] == "right" || this.isDead[1] == "left" || this.isDead[1] == "up" || this.isDead[1] == "down") {
+        this.isDead[1] = "none";
+        this.direction = this.opositeDirection[this.direction];
+      }
+      clearInterval(iDirectionInterval);
+      setTimeout(function () {
+        iDirectionInterval = setInterval(moveI, /*sameSpeed: 100*/17 + ((1580 - x))/93);
+      }, 3700);
+    }
+  }
+}
+
+  function moveI() {
+  if (i.direction == "UP_ARROW") i.y -= scl;
+  else if (i.direction == "DOWN_ARROW") i.y += scl;
+  else if (i.direction == "RIGHT_ARROW") i.x += scl;
+  else i.x -= scl;
+  draw();
+  syncroI();
+}
+
+// snake.js
+function Snake()
+{
+	this.x=0;
+	this.y=0;
+	this.xspeed=1;
+	this.yspeed=0;
+	this.total=1;
+	this.tail=[];
+
+	this.eat=function(pos)
+	{
+		var d=dist(this.x,this.y,pos.x,pos.y);
+		if(d<1){this.total++;return true;}
+		else {return false;}
+	}
+
+	this.dir=function(x,y)
+	{
+		this.xspeed=x;
+		this.yspeed=y;
+	}
+
+	this.death=function(){
+
+		for(var i=0;i<this.tail.length;i++)
+		{
+			var pos=this.tail[i];
+			var d=dist(this.x,this.y,pos.x,pos.y);
+			if(d<1)
+			{
+				console.log('You lose in S.C.R.I.P.T\'s Snake Game!');
+				console.log('starting over');
+				this.total=1;
+				this.tail=[];
+        AblageListe[0] = 0;
+        while (AblageListe[0]*20 < canvas.width/2 && AblageListe[0]*20 < canvas.width) {
+          AblageListe[0]++;
+        }
+        this.x = (floor(AblageListe[0]))*20;
+        AblageListe[0] = 0;
+        while (AblageListe[0]*20 < canvas.height/2 && AblageListe[0]*20 < canvas.height) {
+          AblageListe[0]++;
+        }
+        this.y = (floor(AblageListe[0]))*20;
+        console.log(this.x + this.y);
+        this.dir(1,0);
+      }
+		}
+
+	}
+	this.update=function()
+	{
+		if(this.total===this.tail.length)
+		{
+			for(var i=0;i<this.tail.length-1;i++)
+			{
+			this.tail[i]=this.tail[i+1];
+			}
+
+		}
+		this.tail[this.total-1]=createVector(this.x,this.y);
+		this.x=this.x+this.xspeed*scl;
+		this.y=this.y+this.yspeed*scl;
+
+		this.x=constrain(this.x,0,width-scl);
+		this.y=constrain(this.y,0,height-scl);
+	}
+
+	this.show=function()
+	{
+  	fill(255);
+		for(var i=0;i<this.tail.length;i++)
+		{
+			rect(this.tail[i].x,this.tail[i].y,scl,scl);
+		}
+
+		rect(this.x,this.y,scl,scl);
+	}
+}
+
+// my script
+
+function syncroS() {
+    zählerListe[0] = 0;
+    AblageListe[0] = [];
+    while (zählerListe[0] < s.tail.length) {
+      AblageListe[0][zählerListe[0]] = {"x":0,"y":0,"z":0};
+      AblageListe[0][zählerListe[0]].x = s.tail[zählerListe[0]].x;
+      AblageListe[0][zählerListe[0]].y = s.tail[zählerListe[0]].y;
+      AblageListe[0][zählerListe[0]].z = s.tail[zählerListe[0]].z;
+      zählerListe[0]++;
+    }
+    room.send({
+      message: {
+        "type": "s",
+        "data": [s.x, s.y, s.xspeed, s.yspeed, s.total, [AblageListe[0], s.tail[-1]], [food.x, food.y, food.z]],
+        "Empfänger": 1
+      }
+    });
+}
+function syncroI() {
+    room.send({
+      message: {
+        "type": "i",
+        "data": [i.x, i.y, food.x, food.y],
+        "Empfänger": 0
+      }
+    });
+}
+
+</script>
