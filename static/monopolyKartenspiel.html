@@ -33,7 +33,7 @@
   var nameSpiel = "none";
   var spielstände = [];
   var Bild = new Image();
-  Bild.src = "http://adi.nicolaiweitkemper.de/Bilder/regenbogen004_1024x768.jpg";
+  Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/regenbogen004_1024x768.jpg";
 
   var textur = document.getElementById('textur');
   var canvas = textur.getContext('2d'); //Dimension
@@ -56,8 +56,8 @@ var liIndex;
       y = w.innerHeight|| e.clientHeight|| g.clientHeight;
   console.log(x + ' × ' + y);
 
-  //  Bild.src = "http://adi.nicolaiweitkemper.de/Bilder/Gewinnerbildschirm.jpeg"
-  //  Bild.src = "http://adi.nicolaiweitkemper.de/Bilder/Verloren%20Bildschirm.jpg"
+  //  Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gewinnerbildschirm.jpeg"
+  //  Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Verloren%20Bildschirm.jpg"
   //    setInterval(sendNumber, 100);
   setTimeout(function () {
       ServerLaden();
@@ -169,7 +169,7 @@ function keinenSpielstandLaden() {
       }
     }
 
-    if (message.type == "reloadPage") {location.reload();audio = new Audio("http://adi.nicolaiweitkemper.de/Sounds/FAIL%20SOUND%20EFFECT.mp3").play();}
+    if (message.type == "reloadPage") {location.reload();audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/FAIL%20SOUND%20EFFECT.mp3").play();}
     if (message.type == "test") {
       if (message.Koordinaten > 500) {
         koordinaten[3]++;
@@ -185,11 +185,11 @@ function keinenSpielstandLaden() {
     }
     if (message.type == undefined && message == spielerIch + " hat gewonnen!!!") {
       console.log("Du hast gewonnen!!!");
-      audio = new Audio("http://soundbible.com/mp3/Ta Da-SoundBible.com-1884170640.mp3").play();
+      audio = new Audio("https://soundbible.com/mp3/Ta Da-SoundBible.com-1884170640.mp3").play();
       setTimeout(function() {
         canvas.fillStyle = "green";
         canvas.fillRect(0, 0, 1847, 973)
-        Bild.src = "http://adi.nicolaiweitkemper.de/Bilder/Gewinnerbildschirm.jpeg"
+        Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gewinnerbildschirm.jpeg"
         canvas.drawImage(Bild, 260, 0);
         setTimeout(function() {
           canvas.drawImage(Bild, 260, 0);
@@ -199,9 +199,9 @@ function keinenSpielstandLaden() {
       console.log("Du hast verloren!!!");
       canvas.fillStyle = "red";
       canvas.fillRect(0, 0, 1847, 973)
-      Bild.src = "http://adi.nicolaiweitkemper.de/Bilder/Verloren%20Bildschirm.jpg"
+      Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Verloren%20Bildschirm.jpg"
       canvas.drawImage(Bild, 260, 0);
-      audio = new Audio("http://adi.nicolaiweitkemper.de/Sounds/FAIL%20SOUND%20EFFECT.mp3").play();
+      audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/FAIL%20SOUND%20EFFECT.mp3").play();
       setTimeout(function() {
         canvas.drawImage(Bild, 260, 0);
       }, 100);
@@ -239,7 +239,7 @@ function keinenSpielstandLaden() {
             window.scroll(0,0);
           }
         }}, 300);
-      new Audio("http://www.orangefreesounds.com/wp-content/uploads/2019/03/Elevator-ding-dong-sound-effect.mp3").play();
+      new Audio("https://www.orangefreesounds.com/wp-content/uploads/2019/03/Elevator-ding-dong-sound-effect.mp3").play();
     }
     if (message.type == "spielerDu") spielerIch = message.data;
     if (message.type == "Bezahlen vollständig" && spielerIch == spielerAktuell) {
@@ -1941,10 +1941,10 @@ spieler[zählerListe[2]].kartenMitte = karten;
       canvas.fillText(textButton, 15 + 13, 557);
       if (/* karten.length > 5 */ 335 + 250*karten.length > x) {
         Bild = new Image();
-        Bild.src = "http://adi.nicolaiweitkemper.de/Bilder/PfeilTranzparent.png"
+        Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/PfeilTranzparent.png"
         canvas.drawImage(Bild, /* 1488 */ x - 102 + scrollX, 635 - koordinaten[2], 100, 100);
         Bild = new Image();
-        Bild.src = "http://adi.nicolaiweitkemper.de/Bilder/regenbogen004_1024x768.jpg";
+        Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/regenbogen004_1024x768.jpg";
       }
     }
 
@@ -2015,7 +2015,7 @@ spieler[zählerListe[2]].kartenMitte = karten;
   /*
   Bild = new Image();
     Bild.src =
-        "http://adi.nicolaiweitkemper.de/Bilder/PfeilTranzparent.png"
+        "https://adi.nicolaiweitkemper.de/Bilder/PfeilTranzparent.png"
   canvas.drawImage(Bild, 1488, 0, 100, 100);
   */
   }
