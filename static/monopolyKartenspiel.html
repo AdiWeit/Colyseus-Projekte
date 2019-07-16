@@ -97,12 +97,12 @@ function keinenSpielstandLaden() {
     }, 500);
   }
 
-  room.listen("messages/:index", function(change) {
-    console.log("CHANGE!", change);
-  });
-
   room.onJoin.add(function() {
     console.log("joined");
+  });
+
+  room.listen("messages/:index", function(change) {
+    console.log("CHANGE!", change);
   });
 
   room.onStateChange.addOnce(function(state) {
@@ -239,7 +239,7 @@ function keinenSpielstandLaden() {
             window.scroll(0,0);
           }
         }}, 300);
-      new Audio("https://www.orangefreesounds.com/wp-content/uploads/2019/03/Elevator-ding-dong-sound-effect.mp3").play();
+      new Audio("http://adi.nicolaiweitkemper.de/Sounds/Elevator-ding-dong-sound-effect%20(Spielerwechsel).mp3").play();
     }
     if (message.type == "spielerDu") spielerIch = message.data;
     if (message.type == "Bezahlen vollständig" && spielerIch == spielerAktuell) {
