@@ -17,10 +17,9 @@
   "license": "ISC",
   "dependencies": {
     "@colyseus/monitor": "^0.1.7",
-    "colyseus": "^0.10.1",
-    "colyseus.js": "^0.10.2",
-    "express": "^4.14.0",
-    "nodemon": "^1.11.0",
+    "colyseus": "^0.10.8",
+    "colyseus.js": "^0.10.8",
+    "nodemon": "^1.19.1",
     "serve-index": "^1.8.0",
     "superagent": "^3.8.1"
   },
