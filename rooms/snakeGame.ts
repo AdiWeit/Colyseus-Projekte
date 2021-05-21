@@ -4,6 +4,8 @@ export class snakeGame extends Room {
   maxClients = 4;
   player1 = null;
   player2 = null;
+  player3 = null;
+  player4 = null;
   onInit(options) {
     console.log("BasicRoom created!", options);
   }
@@ -15,12 +17,16 @@ export class snakeGame extends Room {
       client: client,
     };
     console.log(AnzahlSpieler);
-    if (AnzahlSpieler < 2) {this.player1 = newPlayer;console.log("1. Spieler joint")}
-    else {this.player2 = newPlayer;console.log("2. Spieler joint")}
+    if (AnzahlSpieler < 2) {this.player1 = newPlayer;console.log("1. Spieler joined")}
+    else if (AnzahlSpieler < 3) {this.player2 = newPlayer;console.log("2. Spieler joined")}
+    else if (AnzahlSpieler < 4) {this.player3 = newPlayer;console.log("3. Spieler joined")}
     if (AnzahlSpieler > 1) {
       console.log(this.player1.client + " " + this.player2.client)
-      this.send(this.player1.client, { "type": "spielerDu", "data": 0 });
+  /*    this.send(this.player1.client, { "type": "spielerDu", "data": 0 });
       this.send(this.player2.client, { "type": "spielerDu", "data": 1 });
+      if (AnzahlSpieler > 2) {
+        this.send(this.player3.client, { "type": "spielerDu", "data": 2 });
+      } */
       this.broadcast({ "type": "2playersGetReady"});
       this.broadcast({ "type": "AnzahlSpieler", data: AnzahlSpieler});
     }
