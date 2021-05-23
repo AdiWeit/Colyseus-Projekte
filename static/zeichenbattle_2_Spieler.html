@@ -1,0 +1,1184 @@
+<script type="text/javascript" src="colyseus.js"></script>
+<script src="https://adi.nicolaiweitkemper.de/zeichenBattleThemes.js"></script>
+<div id="sidenav" class="sidenav">
+  <!-- <a>About</a>
+  <a>Services</a>
+  <a>Clients</a>
+  <a>Contact</a> -->
+  <h1 id="timeText" style="color:red; font-size: 25px"></h1>
+  <h1 id="themeText" style="color:red; font-size: 25px"></h1>
+  <!-- <p style="color:white; font-size: 77px">⟲</p> -->
+  <img src="https://adi.nicolaiweitkemper.de/Bilder/zeichenBattle/leftArrow.png" style="width: 100; height: 100" onclick="folgenKeyDown({key: 'z', ctrlKey: true});" id="rightArrow"">
+  <img src="https://adi.nicolaiweitkemper.de/Bilder/zeichenBattle/stift.png" style="width: 100; height: 100" onclick="iconSelected(id)" id="pinselIcon"">
+  <img src="https://adi.nicolaiweitkemper.de/Bilder/zeichenBattle/kreis.png" style="width: 100; height: 100" onclick="iconSelected(id)" id="kreisIcon"">
+  <img src="https://adi.nicolaiweitkemper.de/Bilder/zeichenBattle/fuellen.png" style="width: 100; height: 100" onclick="iconSelected(id)" id="fillIcon"">
+  <img src="https://adi.nicolaiweitkemper.de/Bilder/zeichenBattle/drawLine.png" style="width: 100; height: 100" onclick="iconSelected(id)" id="lineIcon"">
+  <img src="https://adi.nicolaiweitkemper.de/Bilder/zeichenBattle/finished.png" style="width: 100; height: 100" onclick="drawingFinished();" id="finsishFlag"">
+  <img src="https://adi.nicolaiweitkemper.de/Bilder/zeichenBattle/rightArrow.png" style="width: 100; height: 100" onclick="folgenKeyDown({key: 'y'});" id="leftArrow"">
+  <!-- <h1 style="color:white; font-size: 77px">⟳</h1> -->
+</div>
+<style media="screen">
+  /* The sidebar menu */
+.sidenav {
+  height: 100%; /* Full-height: remove this if you want "auto" height */
+  width: 100px; /* Set the width of the sidebar */
+  position: fixed; /* Fixed Sidebar (stay in place on scroll) */
+  z-index: 1; /* Stay on top */
+  top: 10; /* Stay at the top */
+  left: 1000;
+  background-color: #111; /* Black */
+  overflow-x: hidden; /* Disable horizontal scroll */
+  padding-top: 20px;
+}
+
+/* The navigation menu links */
+.sidenav a {
+  padding: 6px 8px 6px 16px;
+  text-decoration: none;
+  font-size: 25px;
+  color: #818181;
+  display: block;
+}
+
+/* When you mouse over the navigation links, change their color */
+.sidenav a:hover {
+  color: #FF0000;
+}
+
+/* Style page content */
+.main {
+  margin-left: 160px; /* Same as the width of the sidebar */
+  padding: 0px 10px;
+}
+
+/* On smaller screens, where height is less than 450px, change the style of the sidebar (less padding and a smaller font size) */
+@media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+}
+</style>
+<script src="https://adi.nicolaiweitkemper.de/Database/js.js"></script>
+<canvas onmousedown="mousedownOnCanvas();" onmouseup="if (gerät == 'Handy') mouseUpOnCanvas();" id="textur" width="1800" height="700" style="opacity:1"></canvas>
+<canvas id="invisiblTextur" width="1800" height="700"></canvas>
+<div id="settings">
+  <input id="allSizes" onchange="changeUnlocked(id, checked); if (checked) sizeAdding.style.display = 'inline'; else sizeAdding.style.display = 'none';" type="checkbox"> not all sizes
+  <p id="sizeAdding" style="display: none">
+    <br>
+    <input type="text" placeholder="sizes to add" id="sizes">
+    <button type="button" id="addSizes" onclick=" if (JSON.parse(sizes.value) <= 200) unlocked.sizes.push(JSON.parse(sizes.value)); sizes.select();" name="button">add</button>
+  </p>
+  <br>
+  <input type="checkbox" checked="true" onchange="changeUnlocked('colours', checked)" id="colorChange">colour change erlaubt
+  <br>
+  <input type="checkbox" checked="true" onchange="changeUnlocked(id, checked);" id="pinsel">Pinsel erlaubt
+  <br>
+  <input type="checkbox" checked="true" onchange="changeUnlocked(id, checked);" id="kreis">Kreis erlaubt
+  <br>
+  <input type="checkbox" checked="true" onchange="changeUnlocked(id, checked);" id="fill">Füllen erlaubt
+  <br>
+  <input type="checkbox" checked="true" onchange="changeUnlocked(id, checked);" id="line">Linien zeichnen erlaubt
+  <br>
+  <p>
+    <input onfocus="console.log('Tesxtbox betreten'); textBoxSelected = true;" type="text" placeholder="eigenes Wort" id="newWord">
+    <select id="themesSelector"></select>
+    <button type="button" id="addNewWord" onclick="addWord();" name="button">add</button>
+  </p>
+  <p id="sortingSettings">
+    <input onchange="checkSortingSettings(id, checked);" type="checkbox" id="themed">Wörter Thema für Thema
+    <br>
+    <input onchange="checkSortingSettings(id, checked);" checked="true" type="checkbox" id="throughAllThemes">alle Themen durch
+    <br>
+    <input onchange="checkSortingSettings(id, checked);" type="checkbox" id="random">zufällig
+  </p>
+  <p id="votingSettings">
+    <input type="checkbox" onchange="if (checked) pointsForEveryPlayerPossible.checked = false;" checked="true" id="pointsForAllPlayerPossible">An jeden Mitspieler bis zu <input type="text" value="10" id="pointsForAllPlayer"> Punkte verteilbar
+    <br>
+    <input type="checkbox" onchange="if (checked) pointsForAllPlayerPossible.checked = false;" id="pointsForEveryPlayerPossible">Auf alle Mitspieler bis zu <input type="text" id="pointsForEveryPlayer"> Punkte verteilbar
+  </p>
+  <br>
+  <input type="checkbox" onchange="if (checked) timeLimit.style.display = 'inline'; else timeLimit.style.display = 'none';">Zeitlimit
+  <input type="text" style="display:none; width:250px" id="timeLimit" placeholder="[Min]:[Sek] (keine 0 als Lückenfüller!!!)">
+  <br>
+  <input type="checkbox" onchange="if (checked) pointsForEverybody.checked = false;" id="pointsForWin"> Gewinner der Runde 1 Punkt geben
+  <br>
+  <input onchange="if (checked) pointsForWin.checked = false;" checked="true" id="pointsForEverybody" type="checkbox"> Punkte jeder Runde zusammenzählen
+  <br>
+  <input type="text" value="41" placeholder="points required for win" id="pointsRequiredForWin">
+  <br>
+  <button type="button" id="confirmSetting" onclick="confirmSettings();" name="button">Runde beginnen</button>
+</div>
+<br>
+<input type="color" name="color" id="colorPicker">
+<!-- <button type="button" name="button" id="speichern">speichern</button> -->
+<input type="range" list="tickmarks" style="width:200" min="1" max="200" onchange="sliderChanged(value);" value="37" class="slider" id="sliderRadius">
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<div id="app">
+<datalist id="tickmarks">
+  <option v-for="size in sizes" v-bind:value="size"></option>
+</datalist>
+</div>
+<br>
+<input type="checkbox"onchange="visibleArrowButton(checked);" id="arrowsVisible">vor und zurrück buttons anzeigen
+<br>
+<input type="checkbox" id="correctLine" name="button">Linienkorrektur</input>
+<br>
+<input type="text" id="Zoomlevel" style="display:none" value="25" placeholder="Zoomlevel bei Auswertung in %">
+<br>
+<input type="checkbox" checked="true" onchange="if (checked) stayZoomP.style.display = 'inline'; else stayZoomP.style.display = 'none'" id="zoomAusstellung"> bei "Ausstellung" so weit rauszoomen, dass alle Bilder auf den Bildschirm passen
+<p style="display:inline" id="stayZoomP">
+  <br>
+  <input type="checkbox" checked="true" onchange="if (checked) Zoomlevel.style.display = 'none'; else Zoomlevel.style.display = 'inline';" id="stayZoom"> auch bei Auswertung auf dem Zoomlevel bleiben
+</p>
+<script>
+  var app = new Vue({
+  el: '#app',
+  data: {
+    sizes: []
+  }
+})
+  if (navigator.userAgent.match(/Android/i) ||
+navigator.userAgent.match(/webOS/i) ||
+navigator.userAgent.match(/iPhone/i) ||
+navigator.userAgent.match(/iPad/i) ||
+navigator.userAgent.match(/iPod/i) ||
+navigator.userAgent.match(/BlackBerry/i) ||
+navigator.userAgent.match(/Windows Phone/i)
+) {
+var gerät = "Handy"
+console.log("Handy");
+arrowsVisible.checked = true;
+} else {
+var gerät = "PC"//"PC"
+console.log("PC");
+visibleArrowButton(false);
+}
+function visibleArrowButton(checked) {
+  var objConverter = {true: "inline", false: "none"};
+  rightArrow.style.display = objConverter[checked];
+  leftArrow.style.display = objConverter[checked];
+}
+  settings.style.display = "none";
+  function checkSortingSettings(id, checked) {
+    themed.checked = false;
+    throughAllThemes.checked = false;
+    random.checked = false;
+    document.getElementById(id).checked = checked;
+  }
+  textBoxSelected = false;
+  function addWord(enterUsed) {
+    if (newWord.value != "") {themes.ownWords.push(newWord.value); newWord.value = ""; newWord.select();}
+    else if (!enterUsed) {
+      selectedThemes.push(themesSelector.value);
+      for (var i = 0; i < document.getElementById("themesSelector").options.length; i++) {
+        if (themesSelector.options[i].text == themesSelector.value) themesSelector[0].parentNode.removeChild(themesSelector[i]);
+      }
+      newWord.select();
+    }
+  }
+  for (var i = 0; i < Object.keys(themes).length; i++) {
+    if (Object.keys(themes)[i] != "ownWords") {
+    var opt1 = document.createElement("option");
+    document.getElementById("themesSelector").options.add(opt1);
+    opt1.setAttribute("id", i);
+    opt1.text = Object.keys(themes)[i];
+  }
+  }
+  var selectedThemes = [];
+  console.log(themes);
+  inRound = false;
+  function drawingFinished() {
+    inRound = false;
+    room.send({
+      message: {
+        "type": "drawing",
+        data: textur.toDataURL(),
+        size: {x: x, y: y + 10},
+        sender: player.myNumber
+      }
+    });
+    sidenav.style.display = "none";
+    timeDown = 0;
+  }
+  var drawings = [];
+  function iconSelected(id) {
+    var specials = {pinselIcon: {globalAlpha: 1}, kreisIcon: {toDataURL: true}}
+    if (unlocked[id.replace("Icon", "")]) {
+      if (document.getElementById(zustände[1] + 'Icon')) document.getElementById(zustände[1] + 'Icon').style.height = JSON.parse(document.getElementById(zustände[1] + 'Icon').style.width.toString().split("px")[0]) - 10 + "px";
+      if (document.getElementById(zustände[1] + 'Icon')) document.getElementById(zustände[1] + 'Icon').style.width = JSON.parse(document.getElementById(zustände[1] + 'Icon').style.width.toString().split("px")[0]) - 10 + "px";
+      if (document.getElementById(zustände[1] + 'Icon')) document.getElementById(zustände[1] + 'Icon').style.backgroundColor = "";
+      zustände[1] = id.replace("Icon", "");
+      if (document.getElementById(id)) document.getElementById(id).style.height = JSON.parse(document.getElementById(id).style.width.toString().split("px")[0]) + 10 + "px";
+      if (document.getElementById(id)) document.getElementById(id).style.width = JSON.parse(document.getElementById(id).style.width.toString().split("px")[0]) + 10 + "px";
+      if (document.getElementById(id)) document.getElementById(id).style.backgroundColor = "gray";
+      console.log(id.replace("Icon", "") + " ausgewählt");
+
+    }
+    if (specials[id] && specials[id].globalAlpha) canvas.globalAlpha = specials[id].globalAlpha;
+    if (specials[id] && specials[id].toDataURL) dataURL = textur.toDataURL();
+
+    // if (unlocked.pinsel && xMaus > x - 75 && xMaus < x - 75 + 50 && yMaus > 17 && yMaus < 17 + 50) {
+    //   zustände[1] = "pinsel";
+    //   canvas.globalAlpha = 1;
+    //   console.log("pinsel ausgewählt");
+    // }
+    // else if (unlocked.kreis && xMaus > x - 75 && xMaus < x - 75 + 50 && yMaus > 17 + 70 && yMaus < 17 + 70 + 50) {
+    //   zustände[1] = "kreis";
+    //   console.log(zustände[1] + " ausgewählt");
+    //   // buttonLayout(true);
+    //   dataURL = textur.toDataURL();
+    // }
+    // else if (unlocked.fill && xMaus > x - 75 && xMaus < x - 75 + 50 && yMaus > 17 + 70 + 70 && yMaus < 17 + 70 + 70 + 50) {
+    //   zustände[1] = "fill";
+    //   console.log(zustände[1] + " ausgewählt");
+    // }
+  }
+  textur.style.display = "none";
+  invisiblTextur.style.display = "none";
+  function changeUnlocked(id, value) {
+    unlocked[id] = JSON.parse(value);
+  }
+  window.onbeforeunload = function(){
+    console.log("Leave Website");
+      sendJson('/zeichenbattle/logout', {clientId});
+      localStorage.setItem("paintingNowZeichenbattle", textur.toDataURL());
+      localStorage.setItem("timeDownZeichenbattle", timeDown);
+      return 'Are you sure you want to leave?';
+  };
+
+  var host = window.document.location.host.replace(/:.*/, '');
+var client = new Colyseus.Client(location.protocol.replace("http", "ws") + host + (location.port ? ':' + location.port : ''));
+var room = client.join("zeichenbattle_2_Spieler");
+  function confirmSettings() {
+    settings.style.display = "none";
+    room.send({
+      message: {
+        "type": "settings",
+        unlocked: unlocked,
+        ownWords: themes.ownWords,
+        selectedThemes: selectedThemes,
+        selectedOrder: {themed: themed.checked, throughAllThemes: throughAllThemes.checked, random: random.checked},
+        time: timeLimit.value,
+        selectedVoting: {each: {boolean: pointsForAllPlayerPossible.checked, value: pointsForAllPlayer.value}, forAll: {boolean: pointsForEveryPlayerPossible.checked, value: pointsForEveryPlayer.value}},
+        pointsRequired: JSON.parse(pointsRequiredForWin.value),
+        pointsForEveryone: pointsForEverybody.checked
+      }
+    });
+  }
+  var player = {voted: 0, doneVoting: [], animationsFinished: 0, drawingsVoted: 0};
+  function showResults(time, type) {
+    textur.style.touchAction = '';
+    var positionsBefore = 0;
+    for (var i = 0; i < drawings.length; i++) {
+      bild = new Image();
+      bild.src = drawings[i].drawing;
+      if (i > 0) sizesBefore += drawings[i - 1].size.x;
+      else var sizesBefore = 0;
+      canvas.fillStyle = "rgba(255, 0, 0, 0.5)";
+      canvas.fillRect(drawings[i].size.x + positionsBefore, 0, 20, drawings[i].size.y);
+      if (time == 0 && !type) hitboxes.push({from: {x: sizesBefore/* + *20*i*/, y: 0}, to: {x: sizesBefore/* + 20*i*/ + drawings[i].size.x, y: drawings[i].size.y}});
+      canvas.drawImage(bild, sizesBefore + 20*i, 0);
+      positionsBefore += drawings[i].size.x;
+    }
+    if (time < 2) {
+      setTimeout(function () {
+        showResults(time + 1);
+      }, 100);
+    }
+  }
+  var makeAudio = false;
+  function winnerScreen(gewinner, times) {
+    if (!makeAudio && times == 0) {
+      setTimeout(function () {
+        alert("Please relaod the page to play an other round!");
+      }, 5000);
+    }
+    if (name == gewinner) {
+      console.log("Du hast gewonnen!!!");
+      if (times == 0 && !makeAudio) {
+          var audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/longEpicVictorySound.mp3");
+          audio.currentTime = 9.0;
+          audio.play();
+          makeAudio = true;
+      }//audio = new Audio(/*"https://soundbible.com/mp3/Ta Da-SoundBible.com-1884170640.mp3"*/"https://adi.nicolaiweitkemper.de/Sounds/old-victory-sound-roblox-youtubemp3free.org.mp3").play();
+        canvas.fillStyle = "green";
+        canvas.fillRect(0, 0, 1847, 973);
+        bild = new Image();
+        bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gewinnerbildschirm.jpeg";
+        canvas.drawImage(bild, 260, 0);
+    } else {
+      console.log("Du hast verloren!!!");
+      canvas.fillStyle = "red";
+      canvas.fillRect(0, 0, 1847, 973)
+      bild = new Image();
+      bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Verloren%20Bildschirm.jpg"
+      canvas.drawImage(bild, 260, 0);
+      if (times == 0 && !makeAudio)  {makeAudio = true; var audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/FAIL%20SOUND%20EFFECT.mp3").play();}
+    }
+    setTimeout(function () {
+      if (times < 5) winnerScreen(gewinner, times + 1);
+    }, 500);
+    setTimeout(function () {
+      makeAudio = false;
+    }, 5000);
+  }
+  function resultAnimation(x, y, width, height, percentageWidth, i, red, pointsBefore) {
+    canvas.fillStyle = "rgba(0, 0, 255, 0.5)";
+    if (red) canvas.fillStyle = "rgba(255, 0, 0, 0.5)";
+    canvas.fillRect(x, y, width, height);
+    if (y > highestHeight/*drawings[i].size.y*/ - percentageWidth || (red && y > highestHeight - highestHeight*(pointsBefore[drawings[i].name]/JSON.parse(pointsRequiredForWin.value)) - percentageWidth)) {
+      setTimeout(function () {
+        /*if (!(bild.src.includes("Bildschirm"))) */resultAnimation(x, y - 1, width, height, percentageWidth, i, red, pointsBefore);
+      }, 10);
+  }
+  else {
+      player.animationsFinished++;
+      if (player.animationsFinished == player.total)  {
+        setTimeout(function () {
+          canvas.clearRect(0, 0, textur.width, textur.height);
+          setTimeout(function () {
+            showResults(0, "replay");
+          }, 600);
+          voteEnding("totalResults");
+        }, 2777);
+      }
+      else if (player.animationsFinished == player.total*2) {
+        // canvas.clearRect(0, 0, textur.width, textur.height);
+        // setTimeout(function () {
+        voteEnding("addingNewPoints");
+      // }, 3000);
+      }
+      else if (player.animationsFinished == player.total*3) {
+        setTimeout(function () {
+          var end = false;
+          var highest = {player: -1, number: 0}
+          for (var i = 0; i < Object.keys(points).length; i++) {
+            if (!highest.finished && points[Object.keys(points)[i]] > highest.number) {highest = {player: i, number: points[Object.keys(points)[i]], finished: false}}
+            if (points[Object.keys(points)[i]] >= JSON.parse(pointsRequiredForWin.value) && player.myNumber == 0 && highest.finished && i == highest.player) {
+              end = true;
+              room.send({
+                message: {
+                  "type": "win",
+                  player: Object.keys(points)[i]
+                }
+              });
+            }
+            if (!highest.finished && !(i + 1 < Object.keys(points).length)) {highest.finished = true; i = -1;}
+          }
+          if (!end) reset();
+          }, 5555);
+        }
+      }
+}
+function reset(pInterruptAnimation) {
+  textur.width = x - 10;
+  textur.style.touchAction = 'none';
+  textur.height = y;
+  if (gerät == "Handy") {textur.height -= 75; window.scroll(0, 0);}
+  sidenav.style.display = "inline";
+  words.shift();
+  interruptAnimation = pInterruptAnimation;
+  if (words.length == 0 && player.myNumber == 0) {
+    room.send({
+      message: {
+        "type": "newWord",
+        data: prompt("Ihnen sind die Wörter ausgegangen! Bitte geben sie ein weiteres ein!")
+      }
+    });
+  }
+  else if (words.length == 0) words.push("!tsoH mov troW seuen fua netraw ettiB");
+  player.voted = 0;
+  player.drawingsVoted = 0;
+  player.animationsFinished = 0;
+  drawings = [];
+  localStorage.setItem("drawingsZeichenbattle", "{}");
+  hitboxes = [];
+  if (document.getElementById(zustände[1] + 'Icon')) document.getElementById(zustände[1] + 'Icon').style.height = JSON.parse(document.getElementById(zustände[1] + 'Icon').style.width.toString().split("px")[0]) - 10 + "px";
+  if (document.getElementById(zustände[1] + 'Icon')) document.getElementById(zustände[1] + 'Icon').style.width = JSON.parse(document.getElementById(zustände[1] + 'Icon').style.width.toString().split("px")[0]) - 10 + "px";
+  if (document.getElementById(zustände[1] + 'Icon')) document.getElementById(zustände[1] + 'Icon').style.backgroundColor = "";
+  zustände = ["up", "none"];
+  window.scroll(0, 0);
+  if (timeLimit.value != "") startPause();
+  document.body.style.zoom = 1;
+  animateTheme(window.innerWidth/2 - (177/3)*words[0].length, window.innerHeight/2, 177, words[0]);
+  while (varHistory.length > 1) {
+    varHistory.pop();
+  }
+}
+function voteEnding(type) {
+  var pointsBefore = JSON.parse(JSON.stringify(points));
+  for (var i = 0; i < hitboxes.length; i++) {
+    canvas.fillStyle = "red";
+    canvas.font = "100px Georgia";
+    if (!drawings[i].name) drawings[i].name = "kein Name";
+    canvas.fillText(drawings[i].name, hitboxes[i].to.x - drawings[i].size.x/2 - 25*drawings[i].name.length, hitboxes[i].to.y/2);
+    // var totalPoints = 0;
+    // for (var i1 = 0; i1 < drawings.length; i1++) {
+    //   totalPoints += drawings[i1].points;
+    // }
+    if (!points[drawings[i].name]) points[drawings[i].name] = 0;
+    if (!type && pointsForAllPlayerPossible.checked) /*if (!(bild.src.includes("Bildschirm"))) */resultAnimation(hitboxes[i].from.x, /*hitboxes[i].from.y + drawings[i].size.y*/highestHeight, drawings[i].size.x, 1, /*drawings[i].size.y*/highestHeight*(drawings[i].points/(pointsLeft*(player.total - 1)) /*totalPoints*/), i);
+    else if (!type) resultAnimation(hitboxes[i].from.x, /*hitboxes[i].from.y + drawings[i].size.y*/highestHeight, drawings[i].size.x, 1, /*drawings[i].size.y*/highestHeight*(drawings[i].points/(JSON.parse(votingSettings.forAll.value)*(player.total - 1)) /*totalPoints*/), i);
+    else if (type == "totalResults") resultAnimation(hitboxes[i].from.x, /*hitboxes[i].from.y + drawings[i].size.y*/highestHeight, drawings[i].size.x, 1, /*drawings[i].size.y*/highestHeight*(points[drawings[i].name]/JSON.parse(pointsRequiredForWin.value)), i);
+    else {
+      points = JSON.parse(JSON.stringify(pointsBefore));
+      var mostPoints = {number: 0, iList: []};
+      for (var i1 = 0; i1 < drawings.length; i1++) {
+      if (!points[drawings[i1].name]) points[drawings[i1].name] = 0;
+      if (pointsForEverybody.checked) points[drawings[i1].name] += drawings[i1].points;
+      else {
+          if (drawings[i1].points > mostPoints.number) {mostPoints.number = drawings[i1].points; mostPoints.iList = [];}
+          if (drawings[i1].points == mostPoints.number) mostPoints.iList.push(i1);
+        }
+        if (!pointsForEverybody.checked) drawings[i1].points = 0;
+      }
+      if (!pointsForEverybody.checked) {
+        for (var i1 = 0; i1 < mostPoints.iList.length; i1++) {
+          points[drawings[mostPoints.iList[i1]].name]++;
+          drawings[mostPoints.iList[i1]].points = 1;
+        }
+      }
+      localStorage.setItem("pointsZeichenbattle", JSON.stringify(points));
+      resultAnimation(hitboxes[i].from.x, /*hitboxes[i].from.y + drawings[i].size.y*/highestHeight - highestHeight*(pointsBefore[drawings[i].name]/JSON.parse(pointsRequiredForWin.value)), drawings[i].size.x, 1, /*drawings[i].size.y*/highestHeight*(drawings[i].points/JSON.parse(pointsRequiredForWin.value)), i, true, pointsBefore);
+    }
+  }
+}
+var points = {};
+var interruptAnimation = false;
+  room.onMessage.add(function(message) {
+console.log(message)
+    if (message.type == "endGame") {
+      alert("somebody doesn't want to continue playing, so the game ends!");
+      localStorage.setItem("drawingsZeichenbattle", "{}");
+    }
+    if (message.type == "newWord") {
+      if (player.myNumber == 0) words.push("egal!");
+      words.push(message.data);
+      reset(true);
+    }
+    if (message.type == "win") winnerScreen(message.player, 0);
+    if (message.type == "addPoints") drawings[message.index].points += message.points;
+    if (message.type == "endVoting") {
+      player.voted++;
+      if (player.voted == player.total) {
+        voteEnding();
+        if (!stayZoom.checked) document.body.style.zoom = JSON.parse(Zoomlevel.value)/100;
+      }
+    }
+    if (message.type == "drawing") {
+      drawings.push({drawing: message.data, size: message.size, name: names[message.sender], points: 0});
+      if (drawings.length == player.total) {
+        sidenav.style.display = "none";
+        // var biggest = {x: 0, y: 0};
+        textur.width = -(drawings[0].size.x);
+        // textur.height = -(drawings[0].size.y);
+        highestHeight = 0;
+        for (var i = 0; i < drawings.length; i++) {
+          // if (drawings[i].size.x > biggest.x) biggest.x = drawings[i].size.x;
+          // if (drawings[i].size.y > biggest.y) biggest.y = drawings[i].size.y;
+          textur.width += drawings[i].size.x;
+          if (drawings[i].size.y > highestHeight) highestHeight = drawings[i].size.y;
+          // textur.height += drawings[i].size.y;
+        }
+        textur.height = highestHeight;
+        showResults(0);
+        if (zoomAusstellung.checked) {
+          window.scroll(textur.width, textur.height);
+          document.body.style.zoom = 1;
+          while (scrollX > 0 && document.body.style.zoom > 0.01) {
+            document.body.style.zoom -= 0.01;
+            window.scroll(textur.width, textur.height);
+          }
+          if (document.body.style.zoom <= 0.01) {
+            window.scroll(0, 0);
+            document.body.style.zoom = "1";
+          }
+        }
+      }
+      else localStorage.setItem("drawingsZeichenbattle", JSON.stringify(drawings));
+    }
+    if (message.type == "sendSettings") {
+      room.send({
+        message: {
+          "type": "settings",
+          unlocked: unlocked,
+          ownWords: themes.ownWords,
+          selectedThemes: selectedThemes,
+          // selectedOrder: {themed: themed.checked, throughAllThemes: throughAllThemes.checked, random: random.checked},
+          time: timeLimit.value,
+          selectedVoting: votingSettings,
+          pointsRequired: JSON.parse(pointsRequiredForWin.value),
+          pointsForEveryone: pointsForEverybody.checked
+        }
+      });
+      room.send({
+        message: {
+          "type": "wordsOrder",
+          data: words,
+          rejoined: true
+        }
+      });
+    }
+    if (message.type == "settings"&& Object.keys(votingSettings).length == 0) {
+      votingSettings = message.selectedVoting;
+      pointsRequiredForWin.value = message.pointsRequired;
+      pointsForEverybody.checked = message.pointsForEveryone;
+      if (votingSettings.forAll.boolean) {
+        pointsLeft = votingSettings.forAll.value;
+        if (!(selectedThemes.includes("ownWords"))) alert("Sie können " + pointsLeft + " Punkte auf ihre Mitspieler verteilen!");
+      }
+      if (votingSettings.each.boolean) {
+        pointsLeft = votingSettings.each.value;
+        if (!(selectedThemes.includes("ownWords"))) alert("Sie können jedem Mitspieler bis zu " + pointsLeft + " geben!");
+      }
+      unlocked = message.unlocked;
+      textur.style.display = "inline";
+      refreshUnlocked();
+      selectedThemes = message.selectedThemes;
+      if (!(selectedThemes.includes("ownWords"))) {
+      selectedThemes.push("ownWords");
+      themes.ownWords = message.ownWords;
+      var neededTimes = 1;
+      for (var i3 = 0; (!message.selectedOrder.throughAllThemes && i3 < 1) || (message.selectedOrder.throughAllThemes && i3 < neededTimes); i3++) {
+      for (var i = 0; i < Object.keys(themes).length; i++) {
+        if (selectedThemes.includes(Object.keys(themes)[i])) {
+          if (neededTimes == 1) neededTimes--;
+          if (i3 == 0) neededTimes += themes[Object.keys(themes)[i]].length;
+          for (var i1 = 0; (message.selectedOrder.throughAllThemes && i1 < 1) || (!message.selectedOrder.throughAllThemes && i1 < themes[Object.keys(themes)[i]].length); i1++) {
+            if (message.selectedOrder.throughAllThemes) i1 = i3;
+            if (themes[Object.keys(themes)[i]][i1]) words.push(themes[Object.keys(themes)[i]][i1]);
+          }
+        }
+      }
+    }
+      if (message.selectedOrder.random && player.myNumber == 0) {
+      var j, x;
+      for (var i = words.length - 1; i > 0; i--) {
+        j = Math.floor(Math.random() * (i + 1));
+        x = words[i];
+        words[i] = words[j];
+        words[j] = x;
+      }
+    }
+    if (player.myNumber == 0) {
+    room.send({
+      message: {
+        "type": "wordsOrder",
+        data: words
+      }
+    });
+  }
+    // setTimeout(function () {
+    //   animateTheme(window.innerWidth/2 - (177/3)*words[0].length, window.innerHeight/2, 177, words[0]);
+    // }, 3000);
+  }
+    timeLimit.value = message.time;
+    }
+    if (message.type == "wordsOrder") {
+      words = message.data;
+      if (!message.rejoined) animateTheme(window.innerWidth/2 - (177/3)*words[0].length, window.innerHeight/2, 177, words[0]);
+    }
+    if (message.type == "AnzahlSpieler") player.total = message.data;
+    if (message.type == "Reihenfolge") player.aktuell = message.data;
+    // if (message.type == "showStatsVoting") {
+    //   player.voted++;
+    //   if (player.voted == 1) player.voteResult = {};
+    //   if (!player.voteResult[message.name]) player.voteResult[message.name] = 0;
+    //   else player.voteResult[message.name]++;
+    //   if (player.voted == player.total) {
+    //     var highest = {name: "", number: 0};
+    //     for (var i = 0; i < Object.keys(player.voteResult).length; i++) {
+    //       if (player.voteResult[Object.keys(player.voteResult)[i]] > highest.high) {highest = {name: Object.keys(player.voteResult)[i], number: player.voteResult[Object.keys(player.voteResult)[i]]}}
+    //     }
+    //   }
+    // }
+    if (message.type == "spielerDu") {
+      player.myNumber = message.data;
+      if (!message.newRound && confirm("Wollen sie die angefangene Runde weiterspielen?")) {
+        if (gerät == "Handy") textur.height -= 75;
+        textur.style.touchAction = 'none';
+        points = JSON.parse(localStorage.getItem("pointsZeichenbattle"));
+        if (points === null) points = {};
+        dataURL = localStorage.getItem("paintingNowZeichenbattle");
+        textur.style.display = "inline";
+        settings.style.display = "none";
+        laden(undefined, 0, true);
+        // unlocked = JSON.parse(localStorage.getItem("unlockedZeichenbattle"));
+        refreshUnlocked();
+        varHistory.push(textur.toDataURL());
+        pointOfHistory++;
+        timeDown = JSON.parse(localStorage.getItem("timeDownZeichenbattle"));
+        if (timeDown != 1) startPause();
+        inRound = true;
+        drawings = JSON.parse(localStorage.getItem("drawingsZeichenbattle"));
+        setTimeout(function () {
+          themeText.innerHTML = words[0];
+        }, 2000);
+      }
+      else if (!message.newRound) {
+        room.send({
+          message: {
+            "type": "endGame"
+          }
+        });
+      }
+      if (message.data == 0 && player.total > 1) settings.style.display = "inline";
+      names = {};
+      if (!localStorage.getItem("nameOnlineGames") || localStorage.getItem("nameOnlineGames") == "null") {name = prompt("Wie heißen sie? (Der name wird auf dem Gerät gespeichert und kann später noch geändert weden.)");localStorage.setItem("nameOnlineGames",name);}
+      else name = localStorage.getItem("nameOnlineGames");
+      room.send({
+        message: {
+          "type": "syncPlayerName",
+          name: name,
+          player: player.myNumber
+        }
+      });
+    }
+    if (message.type == "syncPlayerName") {
+      names[message.player] = message.name;
+      for (var i = 0; i < /*Object.keys(names).length*/4; i++) {
+        if (names[i] === names[message.player] && i != message.player) {names[message.player] += "|"; i = -1; if (player.myNumber == message.player) name += "|";}
+      }
+      // if (Object.keys(names).length == player.total) {
+      //   room.send({
+      //     message: {
+      //       type: "showStatsVoting",
+      //       data: prompt("Welcher Spieler soll der Host sein und die Einstellungen treffen dürfen? Zur Auswahl stehen: " + Object.keys(names) + ". Bitte geben sie die Zahl für die jeweilige Person ein. Also für " + names[0] + " z.B. 1")
+      //     }
+      //   });
+      // }
+  }
+});
+var votingSettings = {};
+var highestHeight = 0;
+function animateTheme(x, y, size, text, type) {
+  canvas.fillStyle = "red";
+  canvas.font = size + "px Georgia";
+  canvas.clearRect(0, 0, textur.width, textur.height);
+  canvas.fillText(text, x, y);
+  var time = 10;
+  if (size == 177) time = 5;
+  setTimeout(function () {
+    if (!(interruptAnimation && text == "!tsoH mov troW seuen fua netraw ettiB")) {
+    if (!(bild.src.toLowerCase().includes("bildschirm"))) {
+    if (size > /*50*/window.innerWidth/32 && x < window.innerWidth && y > size) animateTheme(x + /*22*/window.innerWidth/72.4, y - /*10*/window.innerHeight/80, size - 3, text, type);
+    else if (x < window.innerWidth - 100) animateTheme(x + 1, y, size, text, type);
+    else {
+      if (!type) themeText.innerHTML = words[0];
+      var letterLength = words[0].length + 1;
+      if (timeLimit.value.length + 3 > letterLength) letterLength = timeLimit.value.length + 3 + 1;
+      // if (!type) textur.height -= 57;
+      if (document.body.scrollHeight > document.body.clientHeight) letterLength++;
+      sidenav.style.width = 85/6*letterLength;
+      sidenav.style.left = window.innerWidth - 85/6*letterLength;
+      textur.width = document.getElementsByClassName('sidenav')[0].style.left.toString().split("px")[0] - 10;
+      textur.style.touchAction = 'none';
+      if (document.body.scrollHeight > document.body.clientHeight) sidenav.style.left -= 85/6;
+      var iconList = ["pinselIcon", "kreisIcon", "fillIcon", "lineIcon", "finsishFlag", "rightArrow", "leftArrow"];
+      for (icon of iconList) {
+        document.getElementById(icon).style.width = JSON.parse(sidenav.style.width.toString().split("px")[0]) - 10;
+        document.getElementById(icon).style.height = JSON.parse(sidenav.style.width.toString().split("px")[0]) - 10;
+      }
+      // if (!type) textur.width -= 85/6*letterLength - 5;
+      sidenav.style.top = 8;
+      if (timeLimit.value == "") inRound = true;
+      if (timeLimit.value != "" && !type) {
+        animateTheme(window.innerWidth/2 - (177/3)*timeLimit.value.length, window.innerHeight/2, 177, timeLimit.value, "time");
+      }
+      else if (timeLimit.value != "") {
+        console.log("time showing finished");
+        timeDown = (JSON.parse(timeLimit.value.toString().split(':')[0]/*.replace("00", "0")*/)*60*1000 + JSON.parse(timeLimit.value.toString().split(':')[1]/*.replace("00", "0")*/*1000))/100;
+        startPause();
+        inRound = true;
+      }
+      else {
+        timeDown = 1;
+      }
+    }
+  }
+}
+  }, time);
+}
+var hitboxes = [];
+var words = [];
+  var name = "";
+  var names = {};
+  var unlocked = {allSizes: false, pinsel: true, kreis: true, line: true, fill: true, sizes: [/*10, 30, 50, 133*/], colours: true};//["pinsel", "kreis", "fill", {sizes: [10, 30, 50, 133]}, "colours"];
+  function refreshUnlocked() {
+  if (!(unlocked.colours)) colorPicker.style.display = "none";
+  app.sizes = unlocked.sizes;
+  sliderChanged(sliderRadius.value);
+  // for (var i = 0; i < unlocked.sizes.length; i++) {
+  //   var text = document.createElement("H4");
+  //   text.innerHTML = "|"//unlocked.sizes[i];
+  //   text.style.position = "absolute";
+  //   text.style.left = 90/*133*/ + unlocked.sizes[i]*0.6;
+  //   text.style.top = textur.height + 50;
+  //   // text.style.top = "500";
+  //   document.body.appendChild(text);
+  // }
+  // buttonLayout();
+  for (var i = 0; i < Object.keys(unlocked).length; i++) {
+    if (!unlocked[Object.keys(unlocked)[i]] && (Object.keys(unlocked)[i] == "pinsel" || Object.keys(unlocked)[i] == "kreis" || Object.keys(unlocked)[i] == "line" || Object.keys(unlocked)[i] == "fill")) document.getElementById(Object.keys(unlocked)[i] + "Icon").style.display = "none";
+  }
+  // localStorage.setItem("unlockedZeichenbattle", JSON.stringify(unlocked));
+}
+  function sliderChanged(value) {
+    if (unlocked.allSizes && !(unlocked.sizes.includes(value))) {
+      var otherSizes = [];
+      for (var i = 0; JSON.parse(value) + i < sliderRadius.max; i++) {
+        if (unlocked.sizes.includes(JSON.parse(value) + i)) {
+          otherSizes.push({value: JSON.parse(value) + i, distence: i});
+          i = sliderRadius.max;
+        }
+      }
+      for (var i = 0; JSON.parse(value) - i > 0; i++) {
+        if (unlocked.sizes.includes(JSON.parse(value) - i)) {
+          otherSizes.push({value: JSON.parse(value) - i, distence: i});
+          i = JSON.parse(value);
+        }
+      }
+      if (!otherSizes[1] || otherSizes[0].distence < otherSizes[1].distence) sliderRadius.value = otherSizes[0].value;
+      else sliderRadius.value = otherSizes[1].value;
+
+    // for (var i = 0; unlocked.sizes[i] <= JSON.parse(value); i++) {}
+    // console.log("i: " + i + ", size: " + unlocked.sizes[i - 1] + ", value: " + value);
+    // if (i > 0) sliderRadius.value = unlocked.sizes[i - 1];
+    // else sliderRadius.value = unlocked.sizes[0]
+
+  }
+  }
+// imported
+var canvas = document.getElementById('textur').getContext('2d'); //Dimension
+  var dataURL = textur.toDataURL();
+  var bild = new Image();
+var xMaus = 0;
+var yMaus = 0;
+  var hinzufügenX = 0;
+  var hinzufügenY = 0;
+  var zustände = ["up", "none"];
+  var imgData;// = canvas.getImageData(xMaus,yMaus, 1, 1).data;
+  var zählerListe = [0];
+
+  function laden(history, time, notClear/*, clear*/) {
+    // canvas.fillStyle = "black";
+    // canvas.fillRect(0, 0, window.innerHeight, window.innerWidth);
+    /*if (clear) */ if (!notClear) canvas.clearRect(0, 0, textur.width, textur.height);
+    if (!time || time == 0) bild = new Image();
+    bild.src = dataURL;
+      if (history || pointOfHistory != varHistory.length - 1) bild.src = varHistory[pointOfHistory];
+      setTimeout(function () {
+        if (time != undefined && time < 5) laden(history, time + 1);
+      }, 500);
+    canvas.globalAlpha = 1;
+  /*  canvas.fillStyle = "white";
+    canvas.fillRect(0,0,2000,1000) */
+    canvas.drawImage(bild, 0, 0);
+    // buttonLayout();
+  }
+  var w = window,
+    d = document,
+    e = d.documentElement,
+    g = d.getElementsByTagName('body')[0],
+    x = w.innerWidth || e.clientWidth || g.clientWidth,
+    y = w.innerHeight || e.clientHeight || g.clientHeight;
+  console.log(x + ' × ' + y);
+  document.getElementsByClassName('sidenav')[0].style.left = x - 100;
+  // "button layout
+  textur.width = document.getElementsByClassName('sidenav')[0].style.left.toString().split("px")[0] - 10;//x - 10;
+  textur.height = y - 50;
+  if (gerät == "Handy") {textur.height -= 75; window.scroll(0, 0);}
+//   function buttonLayout(noImages) {
+//   canvas.fillRect(x - 75, 0, 75, window.innerHeight)
+//   if (unlocked.pinsel) {
+//   canvas.fillStyle = "blue";
+//   canvas.fillRect(x - 75, 17, 50, 50);
+//   canvas.fillStyle = "gray";
+//   canvas.fillRect(x - 70, 22, 40, 40);
+//   // var picture = new Image();
+//   bild.src = "https://adi.nicolaiweitkemper.de/Bilder/zeichenBattle/stift.png";
+//   if (!noImages) canvas.drawImage(bild, x - 70, 17, 40, 40);
+// }
+// if (unlocked.kreis) {
+//   canvas.fillStyle = "blue";
+//   canvas.fillRect(x - 75, 17 + 70, 50, 50);
+//   canvas.fillStyle = "gray";
+//   canvas.fillRect(x - 70, 22 + 70, 40, 40);
+//   // var picture = new Image();
+//   bild.src = "https://adi.nicolaiweitkemper.de/Bilder/zeichenBattle/fuellen.png";
+//   if (!noImages) canvas.drawImage(bild, x - 70, 17 + 70 + 5, 40, 40);
+// }
+// if (unlocked.fill) {
+//   canvas.fillStyle = "blue";
+//   canvas.fillRect(x - 75, 17 + 70 + 70, 50, 50);
+//   canvas.fillStyle = "gray";
+//   canvas.fillRect(x - 70, 22 + 70 + 70, 40, 40);
+//   // var picture = new Image();
+//   bild.src = "https://adi.nicolaiweitkemper.de/Bilder/zeichenBattle/kreis.png";
+//   if (!noImages) canvas.drawImage(bild, x - 70, 17 + 70*2 + 5, 40, 40);
+// }
+// }
+
+  // window.addEventListener('DOMContentLoaded', f, false)
+  document.onmousemove = readMouseMove
+  // var f = function() {
+  //   var eventHandler = function(event) {
+  //         console.log(window.scrollX + " - " + window.scrollY);
+  //     hinzufügenX = window.scrollX;
+  //     hinzufügenY = window.scrollY;
+  //   };
+  //   window.addEventListener('scroll', eventHandler, false)
+  // };
+  // document.body.style.backgroundColor = "black";
+  textur.style.backgroundColor = "black"
+  document.getElementById('colorPicker').value = "#ffffff";
+  function readMouseMove(e) {
+    // canvas.fillStyle = "black";
+    // canvas.fillRect(0, 0, window.innerWidth, window.innerHeight);
+    // buttonLayout();
+    if (timeDown > 0 && (gerät == "PC" || zustände[1] != "kreis")) {
+      if (zustände[1] == "line" && lineCoordinate) {
+        laden();
+        if (((yMaus < lineCoordinate.y && lineCoordinate.y - yMaus > 5) || xMaus > lineCoordinate.x && xMaus - lineCoordinate.x > 5) && !lineCoordinate.changed && correctLine.checked) {
+          lineCoordinate = {x: lineCoordinate.x - JSON.parse(sliderRadius.value)/2, y: lineCoordinate.y, changed: true}
+          console.log("corrected!");
+        }
+        if (xMaus < lineCoordinate.x && lineCoordinate.x - xMaus > 5 && !lineCoordinate.changed && correctLine.checked) {
+          lineCoordinate = {x: lineCoordinate.x + JSON.parse(sliderRadius.value)/2, y: lineCoordinate.y, changed: true}
+          console.log("corrected!");
+        }
+        canvas.globalAlpha = 0.3;
+        canvas.lineWidth = document.getElementById('sliderRadius').value;
+        canvas.strokeStyle = document.getElementById('colorPicker').value;
+        canvas.beginPath();
+        canvas.moveTo(lineCoordinate.x, lineCoordinate.y);
+        canvas.lineTo(xMaus, yMaus);
+        canvas.stroke();
+      }
+    // if (zustände[1] == "kreis"/* && xMaus < x - 120 && (zustände[0][0] == "placed" == false || xMaus > zustände[0][1] + 66 || yMaus > zustände[0][2] + 66 || xMaus < zustände[0][1] - 66 || yMaus < zustände[0][2] - 66)*/) {
+    //   canvas.globalAlpha = 1;
+    //   canvas.fillStyle = "black";
+    //   canvas.beginPath();
+    //   canvas.arc(xMaus - 3,yMaus - 3,JSON.parse(document.getElementById('sliderRadius').value) + 8,0,Math.PI*2, false);
+    //   canvas.fill();
+    // }
+    xMaus = e.clientX + scrollX;
+    yMaus = e.clientY + scrollY;
+    if (zustände[1] == "kreis" && xMaus < x - 120 /* && (zustände[0][0] == "placed" == false || xMaus > zustände[0][1] + 66 || yMaus > zustände[0][2] + 66 || xMaus < zustände[0][1] - 66 || yMaus < zustände[0][2] - 66)*/) {
+      laden();
+      // canvas.fillStyle = document.getElementById('colorPicker').value;//"black"
+      canvas.globalAlpha = 0.3;
+      canvas.fillStyle = document.getElementById('colorPicker').value;
+      canvas.beginPath();
+      canvas.arc(xMaus,yMaus,document.getElementById('sliderRadius').value,0,Math.PI*2, false);
+      canvas.fill();
+    }
+    if (zustände[0] == "down" && zustände[1] == "pinsel") {
+      console.log("zeichnen");
+      // canvas.fillStyle = document.getElementById('colorPicker').value;
+      canvas.fillRect(xMaus - 5, yMaus - 5, sliderRadius.value, sliderRadius.value);
+    }
+    if ((zustände[0][0] == "placed" && xMaus > zustände[0][1] + 66 || yMaus > zustände[0][2] + 66 || xMaus < zustände[0][1] - 66 || yMaus < zustände[0][2] - 66)) {
+      zustände[0] = "none";
+    }
+  }
+  else {
+    xMaus = e.clientX + scrollX;
+    yMaus = e.clientY + scrollY;
+  }
+  xMaus /= JSON.parse(document.body.style.zoom);
+  yMaus /= JSON.parse(document.body.style.zoom);
+}
+
+  document.addEventListener('touchmove', touch);
+  document.addEventListener('touchstart', touch);
+  document.addEventListener('touchend', touch);
+  // var inkMovement = false;
+  document.body.style.zoom = "1";
+  function touch(ev) {
+    if (ev.touches[0]) xMaus = ev.touches[0]["pageX"]// + scrollX;
+    if (ev.touches[0]) yMaus = ev.touches[0]["pageY"]// + scrollY;
+    xMaus /= JSON.parse(document.body.style.zoom);
+    yMaus /= JSON.parse(document.body.style.zoom);
+    if (ev.type == "touchend") {
+      console.log(ev.type);
+    }
+    if (ev.type == "touchend" && xMaus < textur.width/*inkMovement*/ && inRound) {
+      if (zustände[1] == "line") {
+        // zustände[0] = "up";
+        laden();
+      }
+      mouseUpOnCanvas();
+    }
+    if (ev.type == "touchstart") {
+      mousedownOnCanvas();
+      // inkMovement = false;
+    }
+    if (ev.type == "touchmove" && zustände[1] != "kreis") {
+      readMouseMove({clientX: xMaus, clientY: yMaus});
+      // inkMovement = true;
+    }
+    if (ev.type == "touchend" && zustände[1] == "line") mousedownOnCanvas();
+    if (ev.type == "touchend") zustände[0] = "up";
+  }
+  var searchedColores = [];
+  var varHistory = [textur.toDataURL()];
+  var pointOfHistory = 0;
+  function folgenKeyDown(event) {
+    if (event.key == "z" && event.ctrlKey && pointOfHistory > 0) pointOfHistory--;
+    if ((event.key == "y" || event.key == "Z") && pointOfHistory < varHistory.length - 1) pointOfHistory++;
+    if ((event.key == "z" && event.ctrlKey && pointOfHistory > 0) || ((event.key == "y" || event.key == "Z") && pointOfHistory < varHistory.length - 1)) {
+      laden(true, 0);
+    }
+  }
+  document.body.onmouseup = function() {
+    if (gerät == "PC") mouseUpOnCanvas();
+  }
+  function mouseUpOnCanvas() {
+    if (((zustände[0] != "up" && gerät == "PC") || (gerät == "Handy"/* && zustände[1] == "line"*/)) && (lineCoordinate == false || lineCoordinate == undefined || gerät == "Handy")) {
+    if (pointOfHistory != varHistory.length - 1) pointOfHistory = varHistory.length - 1;
+    console.log("new point of history created");
+    varHistory.push(textur.toDataURL());
+    dataURL = textur.toDataURL();
+    pointOfHistory++;
+  }
+  zustände[0] = "up";
+  }
+  document.body.onmousedown = function() {
+  textBoxSelected = false;
+}
+document.onkeydown = function(event) {
+  if (event.key == "Enter") addWord(true);
+  folgenKeyDown(event);
+}
+  var pointsLeft = 10;
+  function endVotingF() {
+    setTimeout(function () {
+      room.send({
+        message: {
+          "type": "endVoting"
+        }
+      });
+    }, 1777);
+  }
+  function mousedownOnCanvas() {
+    for (var i = 0; i < hitboxes.length; i++) {
+      if (xMaus > hitboxes[i].from.x && xMaus < hitboxes[i].to.x && xMaus > hitboxes[i].from.y && yMaus < hitboxes[i].to.y && drawings[i].name != names[player.myNumber] && !drawings[i].voted) {
+        console.log(i + ". drawing clicked");
+        var points = JSON.parse(prompt("Wie viele Punkte wollen sie vergeben? Um die Aktion abzubrechen, bitte abbrechen/cancel klicken!"));
+        if ((points || points == 0) && pointsLeft >= points) {
+          drawings[i].voted = true;
+          player.drawingsVoted++;
+          if (player.drawingsVoted == player.total - 1) endVotingF();
+          room.send({
+            message: {
+              "type": "addPoints",
+              points: points,
+              index: i
+            }
+          });
+          pointsLeft -= points;
+          if (votingSettings.each.boolean) pointsLeft = JSON.parse(votingSettings.each.value);//10;
+          else alert("Sie können noch " + pointsLeft + " Punkte verteilen.")
+        }
+        else if (points) alert("Sie haben nur noch " + pointsLeft + " Punkte übrig!");
+      }
+    }
+    canvas.fillStyle = document.getElementById('colorPicker').value;
+    // button click
+    /*if (unlocked.pinsel && xMaus > x - 75 && xMaus < x - 75 + 50 && yMaus > 17 && yMaus < 17 + 50) {
+      zustände[1] = "pinsel";
+      canvas.globalAlpha = 1;
+      console.log("pinsel ausgewählt");
+    }
+    else if (unlocked.kreis && xMaus > x - 75 && xMaus < x - 75 + 50 && yMaus > 17 + 70 && yMaus < 17 + 70 + 50) {
+      zustände[1] = "kreis";
+      console.log(zustände[1] + " ausgewählt");
+      buttonLayout(true);
+      dataURL = textur.toDataURL();
+    }
+    else if (unlocked.fill && xMaus > x - 75 && xMaus < x - 75 + 50 && yMaus > 17 + 70 + 70 && yMaus < 17 + 70 + 70 + 50) {
+      zustände[1] = "fill";
+      console.log(zustände[1] + " ausgewählt");
+    }
+    // füllen
+    else */
+    if (zustände[1] == "line" && xMaus < textur.width) {
+      if (!lineCoordinate) lineCoordinate = {x: xMaus, y: yMaus - JSON.parse(sliderRadius.value)/2};
+      else {
+        laden();
+        canvas.globalAlpha = 1;
+        canvas.lineWidth = document.getElementById('sliderRadius').value;
+        canvas.strokeStyle = document.getElementById('colorPicker').value;
+        canvas.beginPath();
+        canvas.moveTo(lineCoordinate.x, lineCoordinate.y);
+        canvas.lineTo(xMaus, yMaus);
+        canvas.stroke();
+        lineCoordinate = false;
+        dataURL = textur.toDataURL();
+      }
+      if (!correctLine.checked) lineCoordinate.y += JSON.parse(sliderRadius.value)/2;
+    }
+    if (zustände[1] == "fill" && xMaus < textur.width) {
+      localStorage.setItem("paintingNowZeichenbattle", textur.toDataURL());
+      localStorage.setItem("timeDownZeichenbattle", timeDown);
+      zählerListe[2] = 0;
+    //  canvas.fillRect(xMaus, yMaus, 1, 1);
+      zählerListe[0] = 0;
+      getImgDataX();
+      searchedColores = [red, green, blue, alpha];
+      while (red == searchedColores[0] && green == searchedColores[1] && blue == searchedColores[2] && alpha == searchedColores[3] && xMaus + zählerListe[0] - 2 < x  && zustände[0] == "beendet" == false) {
+        if (xMaus + zählerListe[0] > x || yMaus + zählerListe[0] > y || xMaus + zählerListe[1] > x) {
+          alert("Die Größe des Objektes übersteigt die Größe des Bildschirmes! Bitte prüfen sie ihr Objekt nach möglichen Lücken, die zu Fehlern führen könnten!")
+          zustände[0] = "beendet";
+          setTimeout(function () {
+            zustände[0] = "up"
+          }, 2000);
+        }
+        getImgDataX();
+        canvas.fillRect(xMaus + zählerListe[0], yMaus, 1, 1);
+        zählerListe[0]++;
+      }
+      zählerListe[0] = -1;
+      getImgDataX();
+      while (red == searchedColores[0] && green == searchedColores[1] && blue == searchedColores[2] && alpha == searchedColores[3] && zustände[0] == "beendet" == false) {
+        if (xMaus + zählerListe[0] > x || yMaus + zählerListe[0] > y || xMaus + zählerListe[1] > x) {
+          alert("Die Größe des Objektes übersteigt die Größe des Bildschirmes! Bitte prüfen sie ihr Objekt nach möglichen Lücken, die zu Fehlern führen könnten!")
+          zustände[0] = "beendet";
+          setTimeout(function () {
+            zustände[0] = "up"
+          }, 2000);
+        }
+        getImgDataX();
+        canvas.fillRect(xMaus + zählerListe[0], yMaus, 1, 1);
+        zählerListe[0]--;
+      }
+      zählerListe[1] = 0;
+      zählerListe[0] = 1;
+      getImgDataY();
+      while (red == searchedColores[0] && green == searchedColores[1] && blue == searchedColores[2] && alpha == searchedColores[3] && zustände[0] == "beendet" == false) {
+        if (xMaus + zählerListe[0] > x || yMaus + zählerListe[0] > y || xMaus + zählerListe[1] > x) {
+          alert("Die Größe des Objektes übersteigt die Größe des Bildschirmes! Bitte prüfen sie ihr Objekt nach möglichen Lücken, die zu Fehlern führen könnten!")
+          zustände[0] = "beendet";
+          setTimeout(function () {
+            zustände[0] = "up"
+          }, 2000);
+        }
+      zählerListe[0] = 1;
+      getImgDataY();
+      while (red == searchedColores[0] && green == searchedColores[1] && blue == searchedColores[2] && alpha == searchedColores[3] && zustände[0] == "beendet" == false) {
+        if (xMaus + zählerListe[0] > x || yMaus + zählerListe[0] > y || xMaus + zählerListe[1] > x) {
+          alert("Die Größe des Objektes übersteigt die Größe des Bildschirmes! Bitte prüfen sie ihr Objekt nach möglichen Lücken, die zu Fehlern führen könnten!")
+          zustände[0] = "beendet";
+          setTimeout(function () {
+            zustände[0] = "up"
+          }, 2000);
+        }
+        getImgDataY();
+        canvas.fillRect(xMaus + zählerListe[1], yMaus + zählerListe[0], 1, 1);
+        zählerListe[0]++;
+      }
+      zählerListe[0] = -1;
+      getImgDataY();
+      while (red == searchedColores[0] && green == searchedColores[1] && blue == searchedColores[2] && alpha == searchedColores[3] && zustände[0] == "beendet" == false) {
+        if (xMaus + zählerListe[0] > x || yMaus + zählerListe[0] > y || xMaus + zählerListe[1] > x) {
+          alert("Die Größe des Objektes übersteigt die Größe des Bildschirmes! Bitte prüfen sie ihr Objekt nach möglichen Lücken, die zu Fehlern führen könnten!")
+          zustände[0] = "beendet";
+          setTimeout(function () {
+            zustände[0] = "up"
+          }, 2000);
+        }
+        getImgDataY();
+        canvas.fillRect(xMaus + zählerListe[1], yMaus + zählerListe[0], 1, 1);
+        zählerListe[0]--;
+      }
+        zählerListe[1]++;
+        zählerListe[0] = 1;
+        getImgDataY();
+      /*  canvas.fillStyle = "red";
+        canvas.fillRect(xMaus + zählerListe[1], yMaus + zählerListe[0], 10, 10); */
+
+        /*
+        zählerListe[0] = 1;
+        getImgDataY();
+        while (red == searchedColores[0] && green == searchedColores[1] && blue == searchedColores[2] && alpha == searchedColores[3]) {
+          getImgDataY();
+          canvas.fillRect(xMaus + zählerListe[1], yMaus + zählerListe[0], 1, 1);
+          zählerListe[0]++;
+        }
+        zählerListe[0] = -1;
+        getImgDataY();
+        while (red == searchedColores[0] && green == searchedColores[1] && blue == searchedColores[2] && alpha == searchedColores[3]) {
+          getImgDataY();
+          canvas.fillRect(xMaus + zählerListe[1], yMaus + zählerListe[0], 1, 1);
+          zählerListe[0]--;
+        }
+          zählerListe[1]++;
+          zählerListe[0] = 1;
+          getImgDataY();
+        */
+    }
+    zählerListe[1] = -1;
+    getImgDataY();
+    while (red == searchedColores[0] && green == searchedColores[1] && blue == searchedColores[2] && alpha == searchedColores[3] && zustände[0] == "beendet" == false) {
+      if (xMaus + zählerListe[0] > x || yMaus + zählerListe[0] > y || xMaus + zählerListe[1] > x) {
+        alert("Die Größe des Objektes übersteigt die Größe des Bildschirmes! Bitte prüfen sie ihr Objekt nach möglichen Lücken, die zu Fehlern führen könnten!")
+        zustände[0] = "beendet";
+        setTimeout(function () {
+          zustände[0] = "up"
+        }, 2000);
+      }
+    zählerListe[0] = 1;
+    getImgDataY();
+    while (red == searchedColores[0] && green == searchedColores[1] && blue == searchedColores[2] && alpha == searchedColores[3] && zustände[0] == "beendet" == false) {
+      if (xMaus + zählerListe[0] > x || yMaus + zählerListe[0] > y || xMaus + zählerListe[1] > x) {
+        alert("Die Größe des Objektes übersteigt die Größe des Bildschirmes! Bitte prüfen sie ihr Objekt nach möglichen Lücken, die zu Fehlern führen könnten!")
+        zustände[0] = "beendet";
+        setTimeout(function () {
+          zustände[0] = "up"
+        }, 2000);
+      }
+      getImgDataY();
+      canvas.fillRect(xMaus + zählerListe[1], yMaus + zählerListe[0], 1, 1);
+      zählerListe[0]++;
+    }
+    zählerListe[0] = -1;
+    getImgDataY();
+    while (red == searchedColores[0] && green == searchedColores[1] && blue == searchedColores[2] && alpha == searchedColores[3] && zustände[0] == "beendet" == false) {
+      if (xMaus + zählerListe[0] > x || yMaus + zählerListe[0] > y || xMaus + zählerListe[1] > x) {
+        alert("Die Größe des Objektes übersteigt die Größe des Bildschirmes! Bitte prüfen sie ihr Objekt nach möglichen Lücken, die zu Fehlern führen könnten!")
+        zustände[0] = "beendet";
+        setTimeout(function () {
+          zustände[0] = "up"
+        }, 2000);
+      }
+      getImgDataY();
+      canvas.fillRect(xMaus + zählerListe[1], yMaus + zählerListe[0], 1, 1);
+      zählerListe[0]--;
+    }
+      zählerListe[1]--;
+      zählerListe[0] = 1;
+      getImgDataY();
+    /*  canvas.fillStyle = "red";
+      canvas.fillRect(xMaus + zählerListe[1], yMaus + zählerListe[0], 10, 10); */
+  }
+  console.log(zählerListe[2]);
+  }
+  // Kreis zeichneXn
+    else if (zustände[1] == "kreis" && xMaus < x - 120 && xMaus < x - 120 && (zustände[0][0] == "placed" && xMaus > zustände[0][1] + 66 || yMaus > zustände[0][2] + 66 || xMaus < zustände[0][1] - 66 || yMaus < zustände[0][2] - 66) == false) {
+      zustände[0] = ["placed", xMaus, yMaus];
+      // canvas.fillStyle = document.getElementById('colorPicker').value;
+      canvas.globalAlpha = 1;
+      canvas.beginPath();
+      canvas.arc(xMaus,yMaus,document.getElementById('sliderRadius').value,0,Math.PI*2, false);
+      canvas.fill();
+      console.log("kreisPlaziert");
+      // buttonLayout(true);
+      dataURL = textur.toDataURL();
+    }
+    else if (zustände[0] == "up" && zustände[1] != "none") {
+      zustände[0] = "down";
+      console.log(zustände[1] + " gesenkt");
+    }
+    else if (zustände[1] != "none") {
+      zustände[0] = "up";
+      console.log(zustände[1] + " angehoben");

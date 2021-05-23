@@ -91,7 +91,7 @@
   var canvas = textur.getContext('2d'); //Dimension
   var host = window.document.location.host.replace(/:.*/, '');
 var client = new Colyseus.Client(location.protocol.replace("http", "ws") + host + (location.port ? ':' + location.port : ''));
-var room = client.join("monopolyKartenspiel");
+var room = client.join("monopolyKartenspiel_3_Spieler");
   //var client = new Colyseus.Client(location.protocol.replace("http", "ws") + host + (location.port ? ':' + location.port : ''));
   //var room = client.join("monopolyKartenspiel");
 
@@ -310,7 +310,7 @@ var room = client.join("monopolyKartenspiel");
       spieler[spielerIch].ereignisBevor = {};
       if (message.newRound != true)
        {
-        // if (JSON.parse(localStorage.getItem('spielerAktuellMonopoly')) != undefined && JSON.parse(localStorage.getItem('spielerAktuellMonopoly')) != "undefined" && confirm("wollen sie die vorherige Runde weiterspielen?"))  {
+        if (JSON.parse(localStorage.getItem('spielerAktuellMonopoly')) != undefined && JSON.parse(localStorage.getItem('spielerAktuellMonopoly')) != "undefined" && confirm("wollen sie die vorherige Runde weiterspielen?"))  {
           if (AnzahlSpieler == 2 && spielerIch == 0) {
             spielerGegner = 1;
           } else if (AnzahlSpieler == 2) {
@@ -326,14 +326,14 @@ var room = client.join("monopolyKartenspiel");
           kartenZiehen = JSON.parse(localStorage.getItem('kartenZiehenMonopoly'));
           AnzahlSpieler = JSON.parse(localStorage.getItem('AnzahlSpielerMonopoly'));
           AblageListe[2] = JSON.parse(localStorage.getItem('AblageListe[2]Monopol'));
-        // }
-        // else {
-        //   room.send({
-        //     message: {
-        //       "type": "endGame"
-        //     }
-        //   });
-        // }
+        }
+        else {
+          room.send({
+            message: {
+              "type": "endGame"
+            }
+          });
+        }
       }
       else {
         if (!localStorage.getItem("nameOnlineGames") || localStorage.getItem("nameOnlineGames") == "null") {spieler[spielerIch].name = prompt("Wie heißen sie? (Der name wird auf dem Gerät gespeichert und kann später noch geändert weden.)");localStorage.setItem("nameOnlineGames", spieler[spielerIch].name);}
