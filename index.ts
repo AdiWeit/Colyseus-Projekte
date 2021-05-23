@@ -41,6 +41,12 @@ import { uno_4_Spieler } from "./rooms/uno_4_Spieler";
 import { zeichenbattle_2_Spieler } from "./rooms/zeichenbattle_2_Spieler";
 import { zeichenbattle_3_Spieler } from "./rooms/uno_3_Spieler";
 import { zeichenbattle_4_Spieler } from "./rooms/uno_4_Spieler";
+import { asFastAsYouCan_2_Spieler } from "./rooms/asFastAsYouCan_2_Spieler";
+import { asFastAsYouCan_3_Spieler } from "./rooms/asFastAsYouCan_3_Spieler";
+import { asFastAsYouCan_4_Spieler } from "./rooms/asFastAsYouCan_4_Spieler";
+import { dieMaulwurfCompany_2_Spieler } from "./rooms/dieMaulwurfCompany_2_Spieler";
+import { dieMaulwurfCompany_3_Spieler } from "./rooms/dieMaulwurfCompany_3_Spieler";
+import { dieMaulwurfCompany_4_Spieler } from "./rooms/dieMaulwurfCompany_4_Spieler";
 // import { hindernisFliegen } from "./rooms/hindernisFliegen";
 // import { Test } from "./rooms/Test";
 
@@ -106,6 +112,12 @@ gameServer.register("uno_4_Spieler", uno_4_Spieler);
 gameServer.register("zeichenbattle_2_Spieler", zeichenbattle_2_Spieler);
 gameServer.register("zeichenbattle_3_Spieler", zeichenbattle_3_Spieler);
 gameServer.register("zeichenbattle_4_Spieler", zeichenbattle_4_Spieler);
+gameServer.register("asFastAsYouCan_2_Spieler", asFastAsYouCan_2_Spieler);
+gameServer.register("asFastAsYouCan_3_Spieler", asFastAsYouCan_3_Spieler);
+gameServer.register("asFastAsYouCan_4_Spieler", asFastAsYouCan_4_Spieler);
+gameServer.register("dieMaulwurfCompany_2_Spieler", dieMaulwurfCompany_2_Spieler);
+gameServer.register("dieMaulwurfCompany_3_Spieler", dieMaulwurfCompany_3_Spieler);
+gameServer.register("dieMaulwurfCompany_4_Spieler", dieMaulwurfCompany_4_Spieler);
 
 // gameServer.register("Test", Test);
 
