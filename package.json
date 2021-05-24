@@ -5,7 +5,7 @@
   "description": "Usage Examples of Colyseus Game Server",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon --watch '**/*.ts' --exec ts-node index.ts",
+    "start": "nodemon --watch '**/*.ts' index.ts",
     "inspect": "node --inspect --require ts-node/register index.ts",
     "bundle-colyseus-client": "browserify ./node_modules/colyseus.js/lib/index.js -s Colyseus -o static/colyseus.js",
     "build": "npm run bundle-colyseus-client",
