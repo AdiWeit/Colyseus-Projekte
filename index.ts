@@ -16,6 +16,42 @@ import { heldenDesOlympRoom } from "./rooms/heldenDesOlymp";
 import { monopolyKartenspiel } from "./rooms/monopolyKartenspiel";
 import { gruselino } from "./rooms/gruselino";
 import { snakeGame } from "./rooms/snakeGame";
+
+import { galgenmaennchen_2_Spieler } from "./rooms/galgenmaennchen/galgenmaennchen_2_Spieler";
+import { galgenmaennchen_3_Spieler } from "./rooms/galgenmaennchen/galgenmaennchen_3_Spieler";
+import { galgenmaennchen_4_Spieler } from "./rooms/galgenmaennchen/galgenmaennchen_4_Spieler";
+
+import { dasVerrueckteLabyrinth_2_Spieler } from "./rooms/dasVerrueckteLabyrinth/dasVerrueckteLabyrinth_2_Spieler";
+import { dasVerrueckteLabyrinth_3_Spieler } from "./rooms/dasVerrueckteLabyrinth/dasVerrueckteLabyrinth_3_Spieler";
+import { dasVerrueckteLabyrinth_4_Spieler } from "./rooms/dasVerrueckteLabyrinth/dasVerrueckteLabyrinth_4_Spieler";
+
+import { dieMaulwurfCompany_2_Spieler } from "./rooms/dieMaulwurfCompany/dieMaulwurfCompany_2_Spieler";
+import { dieMaulwurfCompany_3_Spieler } from "./rooms/dieMaulwurfCompany/dieMaulwurfCompany_3_Spieler";
+import { dieMaulwurfCompany_4_Spieler } from "./rooms/dieMaulwurfCompany/dieMaulwurfCompany_4_Spieler";
+
+import { guessTheValue_2_Spieler } from "./rooms/guessTheValue/guessTheValue_2_Spieler";
+import { guessTheValue_3_Spieler } from "./rooms/guessTheValue/guessTheValue_3_Spieler";
+import { guessTheValue_4_Spieler } from "./rooms/guessTheValue/guessTheValue_4_Spieler";
+
+import { Kaesekaestchen_2_Spieler } from "./rooms/Kaesekaestchen/Kaesekaestchen_2_Spieler";
+import { Kaesekaestchen_3_Spieler } from "./rooms/Kaesekaestchen/Kaesekaestchen_3_Spieler";
+import { Kaesekaestchen_4_Spieler } from "./rooms/Kaesekaestchen/Kaesekaestchen_4_Spieler";
+
+import { Suchlabyrinth_2_Spieler } from "./rooms/Suchlabyrinth/Suchlabyrinth_2_Spieler";
+import { Suchlabyrinth_3_Spieler } from "./rooms/Suchlabyrinth/Suchlabyrinth_3_Spieler";
+import { Suchlabyrinth_4_Spieler } from "./rooms/Suchlabyrinth/Suchlabyrinth_4_Spieler";
+
+import { zeichenbattle_2_Spieler } from "./rooms/zeichenbattle/zeichenbattle_2_Spieler";
+import { zeichenbattle_3_Spieler } from "./rooms/zeichenbattle/zeichenbattle_3_Spieler";
+import { zeichenbattle_4_Spieler } from "./rooms/zeichenbattle/zeichenbattle_4_Spieler";
+
+import { monopolyKartenspiel_2_Spieler } from "./rooms/monopolyKartenspiel/monopolyKartenspiel_2_Spieler";
+import { monopolyKartenspiel_4_Spieler } from "./rooms/monopolyKartenspiel/monopolyKartenspiel_4_Spieler";
+import { monopolyKartenspiel_3_Spieler } from "./rooms/monopolyKartenspiel/monopolyKartenspiel_3_Spieler";
+
+import { asFastAsYouCan_2_Spieler } from "./rooms/asFastAsYouCan/asFastAsYouCan_2_Spieler";
+import { asFastAsYouCan_3_Spieler } from "./rooms/asFastAsYouCan/asFastAsYouCan_3_Spieler";
+import { asFastAsYouCan_4_Spieler } from "./rooms/asFastAsYouCan/asFastAsYouCan_4_Spieler";
 // import { hindernisFliegen } from "./rooms/hindernisFliegen";
 // import { Test } from "./rooms/Test";
 
@@ -54,6 +90,42 @@ gameServer.register("heldenDesOlymp", heldenDesOlympRoom);
 gameServer.register("monopolyKartenspiel", monopolyKartenspiel);
 
 gameServer.register("snakeGame", snakeGame);
+
+gameServer.register("galgenmaennchen_2_Spieler", galgenmaennchen_2_Spieler);
+gameServer.register("galgenmaennchen_3_Spieler", galgenmaennchen_3_Spieler);
+gameServer.register("galgenmaennchen_4_Spieler", galgenmaennchen_4_Spieler);
+
+gameServer.register("dasVerrueckteLabyrinth_2_Spieler", dasVerrueckteLabyrinth_2_Spieler);
+gameServer.register("dasVerrueckteLabyrinth_3_Spieler", dasVerrueckteLabyrinth_3_Spieler);
+gameServer.register("dasVerrueckteLabyrinth_4_Spieler", dasVerrueckteLabyrinth_4_Spieler);
+
+gameServer.register("dieMaulwurfCompany_2_Spieler", dieMaulwurfCompany_2_Spieler);
+gameServer.register("dieMaulwurfCompany_3_Spieler", dieMaulwurfCompany_3_Spieler);
+gameServer.register("dieMaulwurfCompany_4_Spieler", dieMaulwurfCompany_4_Spieler);
+
+gameServer.register("guessTheValue_2_Spieler", guessTheValue_2_Spieler);
+gameServer.register("guessTheValue_3_Spieler", guessTheValue_3_Spieler);
+gameServer.register("guessTheValue_4_Spieler", guessTheValue_4_Spieler);
+
+gameServer.register("Kaesekaestchen_2_Spieler", Kaesekaestchen_2_Spieler);
+gameServer.register("Kaesekaestchen_3_Spieler", Kaesekaestchen_3_Spieler);
+gameServer.register("Kaesekaestchen_4_Spieler", Kaesekaestchen_4_Spieler);
+
+gameServer.register("Suchlabyrinth_2_Spieler", Suchlabyrinth_2_Spieler);
+gameServer.register("Suchlabyrinth_3_Spieler", Suchlabyrinth_3_Spieler);
+gameServer.register("Suchlabyrinth_4_Spieler", Suchlabyrinth_4_Spieler);
+
+gameServer.register("zeichenbattle_2_Spieler", zeichenbattle_2_Spieler);
+gameServer.register("zeichenbattle_3_Spieler", zeichenbattle_3_Spieler);
+gameServer.register("zeichenbattle_4_Spieler", zeichenbattle_4_Spieler);
+
+gameServer.register("monopolyKartenspiel_2_Spieler", monopolyKartenspiel_2_Spieler);
+gameServer.register("monopolyKartenspiel_4_Spieler", monopolyKartenspiel_4_Spieler);
+gameServer.register("monopolyKartenspiel_3_Spieler", monopolyKartenspiel_3_Spieler);
+
+gameServer.register("asFastAsYouCan_2_Spieler", asFastAsYouCan_2_Spieler);
+gameServer.register("asFastAsYouCan_3_Spieler", asFastAsYouCan_3_Spieler);
+gameServer.register("asFastAsYouCan_4_Spieler", asFastAsYouCan_4_Spieler);
 
 gameServer.register("gruselino", gruselino);
 

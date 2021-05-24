@@ -1,0 +1,769 @@
+<script type="text/javascript" src="../colyseus.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
+<div id="voting">
+  <input type="text" id="amountOfGlasses" onchange="if (modeSelction.value == 'field' && value > 50) value = 50;" placeholder="glasses to compare at the same time" value="3">
+  <input type="text" id="pointsRequiredT" placeholder="points for win" value="5">
+  <br>
+  <select id="modeSelction" onchange="modeSelectionChanged(value);">
+    <option value="normal">normal</option>
+    <option value="differentShapes">different shapes</option>
+    <option value="field">field</option>
+  </select>
+  <br>
+  <button type="button" id="confirmVoteB" onclick="confirmVote();" name="button">this is my vote!</button>
+</div>
+<button type="button" id="readyB" onclick="playerReady();" name="button">ready!</button>
+<canvas id="textur" width="1844" onclick="canvasClicked();" height="700"></canvas>
+<canvas id="checkTextur" width="1844" height="700"></canvas>
+<canvas id="samecheckTextur" width="1844" height="700"></canvas>
+<script>
+  checkTextur.style.display = "none";
+  samecheckTextur.style.display = "none";
+  readyB.style.display = "none";
+  window.onbeforeunload = function(){
+    console.log("Leave Website");
+      sendJson('/guessTheValue/logout', {clientId});
+      return 'Are you sure you want to leave?';
+  };
+
+  var host = window.document.location.host.replace(/:.*/, '');
+var client = new Colyseus.Client(location.protocol.replace("http", "ws") + host + (location.port ? ':' + location.port : ''));
+var room = client.join("guessTheValue_3_Spieler");
+  // if (!localStorage.getItem("siteSave")) var siteSave = confirm("Is this website save? (This information is important, because on not save websites, images can't be rendert, which would result an error!)");
+  // else siteSave = JSON.parse(localStorage.getItem("siteSave"));
+  // localStorage.setItem("siteSave", JSON.stringify(siteSave));
+  var player = {points: []};
+  var mode = "";
+  var vote = [];
+  var canvas = textur.getContext('2d'); //Dimension
+  var checkCanvas = checkTextur.getContext('2d'); //Dimension
+  var samecheckCanvas = samecheckTextur.getContext('2d');
+  var mostPixBleibt = {};
+  var loading = {boolean: false, restarted: false};
+  var colours = {};
+  room.onMessage.add(function(message) {
+console.log(message)
+    // if (message.type == "Reihenfolge") {
+    //   player.aktuell = message.data;
+    //  }
+    if (message.type == "layout") {
+      setTimeout(function () {
+        if (readyB.style.display == "none" && playerReadyList == player.total) {
+          layout(undefined, canvas);
+           inRound = true;
+           layout(undefined, samecheckCanvas);
+        }
+      }, 500);
+    }
+    if (message.type == "mostPix") {
+      mostPix = message.data;
+      if (message.first) mostPixBleibt = message.data;
+        if (tips != -1 && loading.boolean == true/*angular.equals(valueShapes(checkCanvas), valueShapes(samecheckCanvas))*/) {
+          room.send({
+            message: {
+              "type": "layout"
+            }
+          });
+      }
+    }
+    if (message.type == "wrongAnswer") {
+      playerReadyList = 0;
+      wrongAnswers++;
+      if (wrongAnswers == 0) wrongAnswers++;
+      if (tips == -1) tips = 0;
+      if (wrongAnswers + tips == player.total) {inRound = false; fill();}
+    }
+    if (message.type == "playerReady") {
+      playerReadyList++;
+      if (playerReadyList == player.total) {
+        layout(undefined, checkCanvas);
+        layout(undefined, canvas);
+        if (mode == "normal" || mode == "field") {createNewSize(); inRound = true;}
+        loading = {boolean: false, restarted: false};
+        if (!(angular.equals(valueShapes(checkCanvas), valueShapes(samecheckCanvas))) && mode == "differentShapes") {
+          inRound = true;
+          if (tips != -1) layout(undefined, samecheckCanvas);
+        }
+        else if (mode == "differentShapes") {
+          canvas.fillText("✿loading...", 222, 222);
+          loading.boolean = true;
+          setTimeout(function () {
+            fill();
+            readyB.style.display = "none";
+          }, 111);
+        }
+        wrongAnswers = 0; tips = 0;
+      }
+    }
+    if (message.type == "spielerDu") {
+      player.myNumber = message.data;
+      mode = "";
+      playerReadyList = 0;
+      setTimeout(function () {
+        if (!inRound && readyB.style.display == "none") confirmVote();
+      }, 40000);
+    }
+    if (message.type == "AnzahlSpieler") {winner = -1; player.total = message.data; pointsRequiredT.value = 5*player.total/*10 + (player.total - 2)*2;*/; vote = []; voting.style.display = "inline"; confirmVoteB.style.display = "inline"; player.points = [];}
+    if (message.type == "onePoint") {
+      playerReadyList = 0;
+      if (!player.points[message.number]) player.points[message.number] = 0;
+      if (tips == -1) tips = 0;
+      if (mode != "normal") player.points[message.number] += player.total - tips;
+      else player.points[message.number]++;
+      if (wrongAnswers == -1) wrongAnswers = 0;
+      tips++;
+      if (mode == "normal" || tips + wrongAnswers == player.total || player.points[message.number] >= player.requiredPoints) {
+      inRound = false;
+      fill();
+      if (player.points[message.number] >= player.requiredPoints && winner == -1) {
+        winner = message.number;
+        setTimeout(function () {
+          readyB.style.display = "none";
+        }, 11);
+        // setTimeout(function () {
+        //   showResult(winner, 0);
+        // }, 3333 + mostPix.number*17);
+      }
+    }
+    }
+    //if (message.type == "size") {playerReadyList = 0; wrongAnswers = 0; tips = 0; }
+    if (message.type == "size"/* && mode == "normal"*/) {
+      textur.height = message.highest;
+      if (tips == -1 && wrongAnswers == -1/*player.points.length == 0*/) inRound = true;
+      size = message.data;
+      if (message.layout || mode == "normal") {layout(undefined, canvas); layout(undefined, samecheckCanvas);}
+      if (mode == "field") {
+        colours = message.colours;
+        layout(message.data, canvas);
+        if (message.colours.red > message.colours.blue) {
+          mostPix.number = message.colours.red;
+          mostPix.colour = "red";
+        }
+        else if (message.colours.red < message.colours.blue) {
+          mostPix.number = message.colours.blue;
+          mostPix.colour = "blue";
+        }
+      }
+    }
+    if (message.type == "vote") {
+      vote.push(message.data);
+      if (vote.length >= player.total) {
+        if (vote.length == player.total) {
+          wrongAnswers = -1;
+          tips = -1;
+          amount = 0;
+          voting.style.display = "none";
+          player.requiredPoints = 0;
+          for (var i = 0; i < vote.length; i++) {
+            amount += vote[i].amountOfGlasses;
+            player.requiredPoints += vote[i].pointsRequired;
+          }
+          amount = amount/vote.length;
+          if (amount > 50 && mode == "field") amount = 50;
+          player.requiredPoints = player.requiredPoints/vote.length;
+          if (player.myNumber == 0) {
+            setTimeout(function () {
+              createNewSize(true);
+            }, 1000);
+        }
+      }
+        var modeCounter = {};
+        for (var i = 0; i < vote.length; i++) {
+          if (!Object.keys(modeCounter).includes(vote[i].mode)) modeCounter[vote[i].mode] = 0;
+          modeCounter[vote[i].mode]++;
+        }
+        var highest = {number: 0, mode: "", draw: []};
+        for (var pMode of Object.keys(modeCounter)) {
+          if (modeCounter[pMode] > highest.number) {
+            highest.number = modeCounter[pMode];
+            highest.mode = pMode;
+            highest.draw = [];
+          }
+          /*else*/ if (modeCounter[pMode] == highest.number) {
+            highest.draw.push(pMode);
+          }
+        }
+        if (highest.draw.length < 2) mode = highest.mode;
+        if (mode == "differentShapes" && highest.draw.length < 2) alert("different shapes wins!");
+        else if (mode == "normal" && highest.draw.length < 2) alert("normal shapes wins!");
+        else if (mode == "field" && highest.draw.length < 2) alert("field shapes wins!");
+        else {
+          if (highest.draw.length > 1) alert("The vote results in a draw! The Computer will decide, which mode will be placed!");
+          if (player.myNumber == 0) {
+            room.send({
+              message: {
+                "type": "vote",
+                data: {mode: highest.draw[Math.round(Math.random() *(highest.draw.length - 1))], amountOfGlasses: message.data.amountOfGlasses, pointsRequired: message.data.pointsRequired}
+              }
+            });
+              setTimeout(function () {
+                createNewSize(true);
+              }, 1000);
+          }
+        }
+        mode = "field";
+      }
+    }
+  });
+  function modeSelectionChanged(mode) {
+    if (mode == "normal" || mode == "differentShapes") amountOfGlasses.value = 3;
+    if (mode == "normal") pointsRequiredT.value = 5 + (player.total - 2);
+    else if (mode == "differentShapes") pointsRequiredT.value = 5*player.total;//10 + (player.total - 2)*2;
+    else {
+      pointsRequiredT.value = 5*player.total;//10 + (player.total - 2)*2;
+      amountOfGlasses.value = 50;
+    }
+  }
+  document.body.style.background = "#FFBF00";
+  var winner = -1;
+  var tips = -1;
+  var amount = 0;
+  var size = {};
+  var wrongAnswers = -1;
+  function fill() {
+    shapeReached = [];
+    visualisationFinished = 0;
+    var pColours = ["red", "blue"];
+    setTimeout(function () {
+      speed = 10;
+      for (var i = 0; mode == "field" && i < 2; i++) {
+        showResults(0, 0, 0, null, pColours[i]);
+      }
+      for (var i = 0; i < amount; i++) {
+        if (mode != "field") showResults(0, 0, i, 0);
+        // TODO: löschen wenn Animation
+        canvas.fillStyle = "black";
+        canvas.font = "30px Georgia";
+        if (i == player.myNumber) canvas.fillStyle = "#0B99B6";
+        var yCoord = 77;
+        if (mode == "field") yCoord = 600;
+        if (player.points[i] != undefined) canvas.fillText(player.points[i], 60 + 188*i, yCoord);
+        else if (i < player.total) canvas.fillText("0", 60 + 188*i, yCoord);
+      }
+    }, 700);
+    readyB.style.display = "inline";
+    if (player.myNumber == 0 && mode == "differentShapes") createNewSize();
+  }
+  function confirmVote() {
+    confirmVoteB.style.display = "none";
+    if (modeSelction.value == "field") amountOfGlasses.value = Math.round(amountOfGlasses.value/16.67);
+    room.send({
+      message: {
+        "type": "vote",
+        "data": {mode: modeSelction.value, amountOfGlasses: JSON.parse(amountOfGlasses.value), pointsRequired: JSON.parse(pointsRequiredT.value)}
+      }
+    });
+  }
+function createShape(i) {
+  data.points[i] = [];
+for (var i1 = 0; i1 < 4 + Math.round(Math.random() *3); i1++) {
+  data.points[i].push({x: Math.round(Math.random() *100) + 50, y: Math.round(Math.random() *100) + 50});
+}
+newShapes++;
+  //console.log("new shape created! (total of " + newShapes);
+  //console.log("check too many new shapes");
+  if (!((newShapes/100 + "").includes("."))) {
+    console.log("too many new shapes rendert!");
+    for (var i = 0; i < amount; i++) {
+      createShape(i);
+    }
+    layout(data, checkCanvas);
+  }
+}
+
+  var mostPix = {number: 0, i: -1};
+  var newShapes = 0;
+  function checkSizeDifference() {
+    layout(data, checkCanvas);
+    mostPix = {number: 0, i: -1};
+    for (var i = 0; i < amount; i++) {
+      if (valueShapes(checkCanvas)[i] > mostPix.number) {mostPix.number = valueShapes(checkCanvas)[i]; mostPix.i = i;}
+    }
+    var gotIt = 0;
+    for (var i = 0; i < amount; i++) {
+      if (mostPix.number - valueShapes(checkCanvas)[i] > 333 || mostPix.number - valueShapes(checkCanvas)[i] < - 333) {
+        newShapesList.push({i: i})//createShape(i); checkSizeDifference();
+      }
+      else gotIt++;
+    }
+    if (gotIt == amount) {
+      // canvas.fillStyle = "FFBF00";
+      // canvas.fillRect(0, 0, 10000, 10000);
+    room.send({
+      message: {
+        "type": "mostPix",
+        "data": mostPix,
+        first: globalFirst
+      }
+    });
+    newShapesFinished();
+  }
+  }
+  var data;
+  var newShapesList = [];
+  var shapeListInt = setInterval(shapeListFun, 333);
+  function shapeListFun() {
+    if (newShapesList.length > 0) {
+      createShape(newShapesList[0].i);
+      newShapesList.shift();
+      if (((tips == -1 || loading.boolean) && !inRound) || winner > -1) {
+        for (var i = 0; i < newShapesList.length; i++) {
+          shapeListFun();
+        }
+      }
+      /*else */if (newShapesList.length == 0 && winner == -1) checkSizeDifference();
+    }
+    if (winner != -1) clearInterval(shapeListInt);
+  }
+  var globalFirst = true;
+  function createNewSize(first) {
+    globalFirst = first;
+    newShapes = 0;
+    console.log("creating new size...");
+    if (mode == "differentShapes") {
+      data = {points: []};
+      for (var i = 0; i < amount; i++) {
+        createShape(i);
+    }
+    checkSizeDifference();
+    }
+    else if (mode == "normal") {
+      data = {width: [], height: []}
+      var volumen = (Math.round(Math.random() *166) + 210)*(Math.round(Math.random() *122) + 50);
+      var width = Math.round(Math.random() *122) + 50;
+      var highest = 0;
+      var volumes = [];
+      for (var i = 0; i < amount; i++) {
+        data.width.push(width - Math.round(Math.random() *50) + 1);
+        // --> war erst Toleranz von 25, jetzt wie bei differentshapes 333
+        for (var i1 = 0; data.width[i]*i1 < volumen - (/*Math.round(Math.random() *50)*/ + 333); i1++) {}
+        data.height.push(i1);
+        if (volumes.includes(data.width[i]*data.height[i])) data.height[i]--;
+        volumes.push(data.width[i]*data.height[i]);
+        if (data.height[data.height.length - 1] > highest) highest = data.height[data.height.length - 1];
+        // data.height.push(umfang - data.width[i]/* - (Math.round(Math.random() *2))*/)
+        // data.height.push(Math.round(Math.random() *88) + 50);
+        // var highest = {width: {number: 0, i: -1}, height: {number: 0, i: -3}}
+        // var lowest = {width: {number: 200, i: -2}, height: {number: 200, i: -4}}
+        // for (var i1 = 0; i1 < data.width.length; i1++) {
+        //   if (data.width[i1] > highest.width.number) {highest.width.number = data.width[i1]; highest.width.i = i1;}
+        //   if (data.height[i1] > highest.height.number) {highest.height.number = data.height[i1]; highest.height.i = i1;}
+        //   if (data.width[i1] < lowest.width.number) {lowest.width.number = data.width[i1]; lowest.width.i = i1;}
+        //   if (data.height[i1] < lowest.height.number) {lowest.height.number = data.height[i1]; lowest.height.i = i1;}
+        // }
+        // var prettyHigh = {width: [], height: []};
+        // for (var i1 = 0; i1 < amount; i1++) {
+        //   if ((data.width[i] > highest.width.number - 11 || data.width[i] > highest.width.number + 11) && i1 != highest.width.i) prettyHigh.width.push(i1);
+        //   if ((data.height[i] > highest.height.number - 11 || data.height[i] > highest.height.number + 11) && i1 != highest.height.i) prettyHigh.height.push(i1);
+        // }
+        // if (i > 0 && (highest.width.i == highest.height.i || lowest.width.i == lowest.height.i/* || prettyHigh.width.includes(i) ||prettyHigh.height.includes(i) || (i > 0 && (data.height[i]*data.width[i] - data.height[i - 1]*data.width[i - 1] > 7333 || data.height[i]*data.width[i] - data.height[i - 1]*data.width[i - 1] < -7333))  /*(i > 0 && ((data.width[i] - data.width[i - 1] < 10) && (data.height[i] - data.width[i-1] < 10)))*/)) {i--; data.width.pop(); data.height.pop();};
+      }
+      newShapesFinished(highest);
+    }
+    else {
+      var field = [];
+      var colours = {red: 0, blue: 0};
+      var randomCounter = {red: 0, blue: 0}
+      for (var i = 0; i < Math.round(amount*16.67); i++) {
+        field[i] = [];
+        for (var i1 = 0; i1 < Math.round(amount*16.67); i1++) {
+          if (!field[i][i1 - 1] && Math.round(Math.random() *100) > 50) field[i][i1] = {colour: "red"};
+          else if (!field[i][i1 - 1]) field[i][i1] = {colour: "blue"};
+          else if ((colours.blue - colours.red < 16 || colours.red - colours.blue < 16) && Math.round(Math.random() *100) > 49) {randomCounter.red++; field[i][i1] = {colour: "red"};}
+          else if ((colours.blue - colours.red < 16 || colours.red - colours.blue < 16)) {field[i][i1] = {colour: "blue"}; randomCounter.blue++;}
+          // else if (colours.blue - colours.red > 7) field[i][i1] = {colour: "red"};
+          // else if (colours.blue - colours.red < -7) field[i][i1] = {colour: "blue"};
+          else if (field[i][i1 - 1] && field[i][i1 - 1].colour == "red" && (Math.round(Math.random() *5)) > 1) field[i][i1] = {colour: "red"};
+          else if (!field[i][i1 - 1] || field[i][i1 - 1].colour == "red") {console.log("blue"); field[i][i1] = {colour: "blue"};}
+          else if (field[i][i1 - 1] && field[i][i1 - 1].colour == "blue" && (Math.round(Math.random() *5)) > 1) {console.log("blue"); field[i][i1] = {colour: "blue"};}
+          else if (!field[i][i1 - 1] || field[i][i1 - 1].colour == "blue") field[i][i1] = {colour: "red"};
+          colours[field[i][i1].colour]++;
+        }
+      }
+      console.log(randomCounter);
+      if (field[0][0].colour == "red" && colours.red == colours.blue) field[0][0].colour = "blue";
+      if (field[0][0].colour == "blue" && colours.red == colours.blue) field[0][0].colour = "red";
+      console.log(colours);
+      globalFirst = false;
+      data = field;
+      newShapesFinished(null, colours);
+    }
+  }
+  function newShapesFinished(highest, colours) {
+    console.log("new shape created!");
+    room.send({
+      message: {
+        "type": "size",
+        "data": data,
+        highest: highest + 40,
+        layout: globalFirst,
+        colours: colours,
+      }
+    });
+    if (globalFirst && mode == "differentShapes") createNewSize();
+  }
+  var filled = 0;
+  function showResult(gewinner, times) {
+    if (show) {
+      room.send({
+        message: {
+          "type": "endGame"
+        }
+      });
+      setTimeout(function () {
+        alert("Please relaod the page to play an other round!");
+      }, 3333);
+    }
+    if (player.myNumber == gewinner) {
+      console.log("Du hast gewonnen!!!");
+      if (times == 0) {
+          var audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/longEpicVictorySound.mp3");
+          audio.currentTime = 9.0;
+          audio.play();
+      }//audio = new Audio(/*"https://soundbible.com/mp3/Ta Da-SoundBible.com-1884170640.mp3"*/"https://adi.nicolaiweitkemper.de/Sounds/old-victory-sound-roblox-youtubemp3free.org.mp3").play();
+        canvas.fillStyle = "green";
+        canvas.fillRect(0, 0, 1847, 973);
+        var Bild = new Image();
+        Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gewinnerbildschirm.jpeg";
+        canvas.drawImage(Bild, 260, 0);
+    } else {
+      console.log("Du hast verloren!!!");
+      canvas.fillStyle = "red";
+      canvas.fillRect(0, 0, 1847, 973)
+      var Bild = new Image();
+      Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Verloren%20Bildschirm.jpg"
+      canvas.drawImage(Bild, 260, 0);
+      if (times == 0)  {var audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/FAIL%20SOUND%20EFFECT.mp3").play();}
+    }
+    setTimeout(function () {
+      if (times < 5) showResult(gewinner, times + 1);
+    }, 500);
+    setTimeout(function () {
+      makeAudio = false;
+    }, 4000);
+  }
+  var playerReadyList = 0;
+  function playerReady() {
+    readyB.style.display = "none";
+    room.send({
+      message: {
+        "type": "playerReady"
+      }
+    });
+  }
+  function valueShapes(canvas) {
+    var values = [];
+    for (var i = 0; i < amount; i++) {
+      // canvas.fillStyle = "red";
+      // canvas.fillRect(20 + 188*i, 20, 188, 10);
+      // canvas.fillRect(20 + 188*i, 20 + 300, 188, 10);
+      imageData = canvas.getImageData(20 + 188*i, 20, 188, 400);
+      red = [];
+      green = [];
+      blue = [];
+      values[i] = 0;
+  for (var i1 = 0; i1 < imageData.data.length; i1++) {
+    if (imageData.data[i1] == 0 && imageData.data[i1 + 1] == 0 && imageData.data[i1 + 2] == 0) values[i]++
+  }
+    }
+    return values;
+  }
+  function showResult(gewinner, times) {
+    if (/*!makeAudio && */times == 0) {
+      inRound = true;
+      setTimeout(function () {
+        inRound = false;
+      }, 1000);
+      room.send({
+        message: {
+          "type": "endGame"
+        }
+      });
+      setTimeout(function () {
+        alert("Please relaod the page to play an other round!");
+      }, 3333);
+    }
+    if (player.myNumber == gewinner) {
+      console.log("Du hast gewonnen!!!");
+      if (times == 0/* && !makeAudio*/) {
+          var audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/longEpicVictorySound.mp3");
+          audio.currentTime = 9.0;
+          audio.play();
+          // makeAudio = true;
+      }//audio = new Audio(/*"https://soundbible.com/mp3/Ta Da-SoundBible.com-1884170640.mp3"*/"https://adi.nicolaiweitkemper.de/Sounds/old-victory-sound-roblox-youtubemp3free.org.mp3").play();
+        canvas.fillStyle = "green";
+        canvas.fillRect(0, 0, 1847, 973);
+        var Bild = new Image();
+        Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gewinnerbildschirm.jpeg";
+        canvas.drawImage(Bild, 260, 0);
+    } else {
+      console.log("Du hast verloren!!!");
+      canvas.fillStyle = "red";
+      canvas.fillRect(0, 0, 1847, 973)
+      var Bild = new Image();
+      Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Verloren%20Bildschirm.jpg"
+      canvas.drawImage(Bild, 260, 0);
+      if (times == 0/* && !makeAudio*/)  {/*makeAudio = true; */var audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/FAIL%20SOUND%20EFFECT.mp3").play();}
+    }
+    setTimeout(function () {
+      if (times < 5) showResult(gewinner, times + 1,);
+    }, 500);
+    // setTimeout(function () {
+    //   makeAudio = false;
+    // }, 4000);
+  }
+  // var makeAudio = false;
+  function showResults(time, i1, i, highestTime, colour) {
+    //canvas.fil  lStyle = "#0B99B6";
+    if (mode == "normal") {
+    var highestMult = {i: -1, number: 0}
+    for (var i2 = 0; i2 < amount; i2++) {
+      if (highestMult.number < size.height[i2]*size.width[i2]) {highestMult.number = size.height[i2]*size.width[i2]; highestMult.i = i2;}
+    }
+    if (i == highestMult.i) canvas.fillStyle = "#40FF00";
+    else canvas.fillStyle = "red";
+    canvas.fillRect(20 + 10 + 188*i + time, 20 + (highest.number - size.height[i]) + size.height[i] - i1, 1, 1);
+    time++;
+    if (time == size.width[i] - 10) {i1++; time = 0;}
+    if (i1 == size.height[i] + 1) {
+      console.log("finishedResult " + i);
+      visualisationFinished++;
+      if (visualisationFinished == amount && winner != -1) showResult(winner, 0);
+    }
+    else if (time == 0) {
+      setTimeout(function () {
+        if (!inRound || (!loading.restarted && loading.boolean)) showResults(time, i1, i, highestTime);
+        if (!inRound || (!loading.restarted && loading.boolean)) loading.restarted = true;
+      }, highestTime);
+    }
+    else {
+      if (highestTime < time) {
+        highestTime = time;
+      }
+      if (!inRound || (!loading.restarted && loading.boolean)) showResults(time, i1, i, highestTime);
+      if ((!loading.restarted && loading.boolean)) loading.restarted = true;
+    }
+  }
+  else if (mode == "differentShapes") {
+    if (i == mostPixBleibt.i) canvas.fillStyle = "#40FF00";
+    else canvas.fillStyle = "red";
+    imageData = canvas.getImageData(20 + 188*i + time, 20 + 188 - i1, 1, 1);
+    red = imageData.data[0];
+    green = imageData.data[1];
+    blue = imageData.data[2];
+    alpha = imageData.data[3];
+    // canvas.fillStyle = "blue";
+    // canvas.fillRect(20 + 188*i + time, 20 + 188 - i1, 1, 1);
+    if (red == 0 && green == 0 && blue == 0) {
+      canvas.fillRect(20 + 188*i + time, 20 + 188 - i1, 1, 1);
+    }
+    time++;
+    if (time == 188)
+    {i1++; time = 0;}
+    if (20 + 188 - i1 < 20) {
+      console.log("finishedResult " + i);
+      visualisationFinished++;
+      if (visualisationFinished == amount && winner != -1) showResult(winner, 0);
+    }
+    else if ((red == 0 && green == 0 && blue == 0) || ((!((i1/10 + "").includes(".")) && time == 0))) {
+      if (!((!((i1/10 + "").includes(".")) && time == 0)) && !shapeReached.length == amount) time--;
+      if (!((!((i1/10 + "").includes(".")) && time == 0)) && !shapeReached[i]) shapeReached[i] = true;
+      setTimeout(function () {
+        if (!inRound || (!loading.restarted && loading.boolean)) showResults(time, i1, i, highestTime);
+        if (!inRound || (!loading.restarted && loading.boolean)) loading.restarted = true;
+      }, 1);
+    }
+    // else if ((!((i1/10 + "").includes(".")) && time == 0)) {
+    //   setTimeout(function () {
+    //     if (!inRound || (!loading.restarted && loading.boolean)) showResults(time, i1, i, highestTime);
+    // if (!inRound || (!loading.restarted && loading.boolean)) loading.restarted = true;
+    //   }, 1);
+    // }
+    else {
+      if (!inRound || (!loading.restarted && loading.boolean)) showResults(time, i1, i, highestTime);
+      if (!inRound || (!loading.restarted && loading.boolean)) loading.restarted = true;
+    }
+  }
+  else if (!inRound) {
+    while (size[i] && size[i][i1] && size[i][i1].colour != colour && size[i]) {
+      i++;
+      if (!size[i]) {
+        i = 0;
+        i1++;
+      }
+    }
+    var changedColours = {red: "green", blue: "yellow"};
+    var colourCoordinates = {red: 2, blue: 1};
+    canvas.fillStyle = colour;
+    canvas.fillRect((50*5 - 5)/colourCoordinates[colour] + 33, 520, 40, 20);
+    canvas.fillStyle = changedColours[colour];
+    canvas.fillRect((50*5 - 5)/colourCoordinates[colour] + 33, 540, 40, 20);
+
+    canvas.fillStyle = "#FFBF00";
+    canvas.font = "21px Georgia";
+    canvas.fillText(time, (50*5 - 5)/colourCoordinates[colour] + 33, 520 + 30);
+
+    canvas.fillStyle = changedColours[colour];
+    canvas.fillRect(10 + i*10, 10 + i1*10, 10, 10);
+    i++;
+    if (!size[i]) {
+      i = 0;
+      i1++;
+    }
+    if (time < colours[colour]) {
+      if (!size[i][i1  + 1]) speed = 500;
+      if (visualisationFinished == 1) speed = 10;
+        setTimeout(function () {
+          showResults(time + 1, i1, i, null, colour);
+        }, speed);
+      }
+      else {
+        visualisationFinished++;
+        if (visualisationFinished == 2 && winner != -1) showResult(winner, 0);
+      }
+  }
+}
+  var speed = 10;
+  var shapeReached = [];
+  var highest;
+  var visualisationFinished = 0;
+  function layout(point, canvas) {
+    canvas.fillStyle = "#FFBF00";
+    canvas.fillRect(0, 0, textur.width, textur.height);
+    if (mode == "normal") {
+    highest = {i: -1, number: 0}
+    for (var i = 0; i < amount; i++) {
+      if (highest.number < size.height[i]) {highest.number = size.height[i]; highest.i = i;}
+    }
+    for (var i = 0; i < amount; i++) {
+        canvas.fillStyle = "black";
+        canvas.fillRect(20 + 188*i, 20 + (highest.number - size.height[i]), 10, size.height[i]);
+        canvas.fillRect(20 + 188*i, 20 + (highest.number - size.height[i]) + size.height[i], size.width[i] + 10, 10);
+        canvas.fillRect(20 + 188*i + size.width[i], 20 + (highest.number - size.height[i]), 10, size.height[i]);
+      }
+    // canvas.fillStyle = "#0B99B6";
+    // canvas.fillRect(30, (20 +size.height[i] - filled), 40, filled);
+  }
+  else if (mode == "differentShapes") {
+    if (!point) var point = size;
+    canvas.fillStyle = "black";
+    for (var i = 0; i < point.points.length; i++) {
+    canvas.beginPath();
+    canvas.moveTo(20 + 188*i + point.points[i][0].x, point.points[i][0].y);
+    for (var i1 = 1; i1 < point.points[i].length - 1; i1++) {
+      canvas.lineTo(20 + 188*i + point.points[i][i1].x, point.points[i][i1].y);
+    }
+    canvas.lineTo(20 + 188*i + point.points[i][0].x, point.points[i][0].y);
+    canvas.closePath();
+    canvas.fill();
+  }
+  }
+  else if (point) {
+    textur.height = point[0].length*10 + 60 + 80;
+    for (var i = 0; i < point.length; i++) {
+      for (var i1 = 0; i1 < point[i].length; i1++) {
+        canvas.fillStyle = point[i][i1].colour;
+        canvas.fillRect(10 + i*10, 10 + i1*10, 10, 10);
+      }
+    }
+    canvas.fillStyle = "red";
+    canvas.fillRect((50*5 - 5)/2 + 33, 520, 40, 40);
+    canvas.fillStyle = "blue";
+    canvas.fillRect((50*5 - 5) + 33, 520, 40, 40);
+  }
+  }
+  function readMouseMove(e) {
+    xMaus = e.clientX + scrollX + textur.getBoundingClientRect().left;
+    yMaus = e.clientY + scrollY + textur.getBoundingClientRect().top + 23;
+    //    console.log(xMaus + " - " + yMaus);
+  }
+  document.onmousemove = readMouseMove
+  var inRound = false;
+  function canvasClicked() {
+    var coordinate = checkSelected();
+    if (mode == "normal" && inRound && checkSelected() != undefined) {
+      var biggest = {number: 0, i: -1}
+      for (var i = 0; i < amount; i++) {
+        if (size.width[i]*size.height[i] > biggest.number) {biggest.number = size.width[i]*size.height[i]; biggest.i = i;}
+      }
+      if (checkSelected() == biggest.i) {
+        rightAnswer(coordinate);
+      }
+      else {
+        wrongAnswer(coordinate);
+      }
+      inRound = false;
+    }
+    else if (mode == "differentShapes" && inRound && checkSelected() != undefined) {
+      mostPix = {number: 0, i: -1};
+      for (var i = 0; i < amount; i++) {
+        if (valueShapes(canvas)[i] > mostPix.number) {mostPix.number = valueShapes(canvas)[i]; mostPix.i = i;}
+      }
+      mostPixBleibt = JSON.parse(JSON.stringify(mostPix));
+      if (mostPix.i == checkSelected()) {
+        rightAnswer(coordinate);
+      }
+      else wrongAnswer(coordinate);
+    }
+    else if (inRound) {
+      if (checkSelected().colour == mostPix.colour) rightAnswer(checkSelected().coordinate);
+      if (checkSelected().colour != mostPix.colour) wrongAnswer(checkSelected().coordinate);
+      inRound = false;
+    }
+    if (checkSelected() != undefined || (mode == "field" && checkSelected() != undefined)) inRound = false;
+  }
+  var xCoord = 0;
+  function rightAnswer(coordinate) {
+    console.log("right answer!");
+    if (mode == "normal") {xCoord = - 62; var yCoord = 20 + highest.number + 27;}
+    // else {xCoord = 0; var yCoord = 200}
+    // if (mode == "field") {xCoord = 77; yCoord = 677;}
+    var Bild = new Image();
+    Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/dieSiedler/greenCheckBox.png";
+    var audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/right%20answer%20sound%20effect-%5bAudioTrimmer.com%5d.mp3").play();
+    if (mode == "normal"/*siteSave*/) canvas.drawImage(Bild, 20 + 188*checkSelected() + 77 + xCoord, 0 + yCoord, 50, 50);
+    setTimeout(function () {
+      if (/*sitesave*/mode == "normal") canvas.drawImage(Bild, 20 + 188*checkSelected() + 77 + xCoord, 0 + yCoord, 50, 50);
+    }, 100);
+    setTimeout(function () {
+      canvas.fillStyle = "#FFBF00";
+      canvas.fillRect(20 + 188*coordinate + 77 + xCoord, 0 + yCoord, 50, 50);
+      room.send({
+        message: {
+          "type": "onePoint",
+          number: player.myNumber
+        }
+      });
+    }, 1000);
+  }
+  function wrongAnswer(coordinate) {
+    console.log("wrong answer!");
+    if (mode == "normal") {xCoord = - 62; var yCoord = 20 + highest.number + 27;}
+    else if (mode == "differentShapes") {xCoord = 0; var yCoord = 200}
+    // else {xCoord = 77; var yCoord = 677;}
+    var Bild = new Image();
+    Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/dieSiedler/redXBox.png";
+    var audio = new Audio("http://adi.nicolaiweitkemper.de/Sounds/Fail%20-%20N%c3%b6%c3%b6t.mp3").play();
+    if (/*sitesave*/mode == "normal") canvas.drawImage(Bild, 20 + 188*checkSelected() + 77 + xCoord, 0 + yCoord, 50, 50);
+    setTimeout(function () {
+      if (/*sitesave*/mode == "normal") canvas.drawImage(Bild, 20 + 188*checkSelected() + 77 + xCoord, 0 + yCoord, 50, 50);
+    }, 100);
+    setTimeout(function () {
+      canvas.fillStyle = "#FFBF00";
+      canvas.fillRect(20 + 188*coordinate + 77 + xCoord, 0 + yCoord, 50, 50);
+      room.send({
+        message: {
+          "type": "wrongAnswer"
+        }
+      });
+    }, 1000);
+  }
+  function checkSelected() {
+      for (var i = 0; i < amount; i++) {
+        if (xMaus > 20 + 188*i && xMaus < 20 + 188*i + 188/*size.width[i]*/  && yMaus < 250) return i;
+      }
+      if (mode == "field" && xMaus > (50*5 - 5)/2 + 33 && xMaus < (50*5 - 5)/2 + 33 + 40 && yMaus > 520 && yMaus < 660) return {colour: "red", coordinate: 0.5};
+      if (mode == "field" && xMaus > (50*5 - 5) + 33 && xMaus < (50*5 - 5) + 33 + 40 && yMaus > 520 && yMaus < 660) return {colour: "blue", coordinate: 1};
+  }
+
+</script>
