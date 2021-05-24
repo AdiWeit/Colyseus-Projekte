@@ -1,4 +1,5 @@
 {
+  "sourceType": "module",
   "name": "colyseus-examples",
   "version": "1.0.0",
   "description": "Usage Examples of Colyseus Game Server",
@@ -30,3 +31,4 @@
     "typescript": "^2.7.2"
   }
 }
+
