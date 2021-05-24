@@ -16,6 +16,7 @@
   "author": "Adrian Weitkemper",
   "license": "ISC",
   "dependencies": {
+    "browserify": "^14.4.0",
     "@colyseus/monitor": "^0.1.7",
     "colyseus": "^0.10.1",
     "colyseus.js": "^0.10.2",
@@ -23,10 +24,7 @@
     "nodemon": "^1.11.0",
     "serve-index": "^1.8.0",
     "superagent": "^3.8.1",
-    "ts-node": "^5.0.1"
-  },
-  "devDependencies": {
-    "browserify": "^14.4.0",
+    "ts-node": "^5.0.1",
     "typescript": "^2.7.2"
   }
 }
