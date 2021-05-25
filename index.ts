@@ -52,6 +52,10 @@ import { monopolyKartenspiel_3_Spieler } from "./rooms/monopolyKartenspiel/monop
 import { asFastAsYouCan_2_Spieler } from "./rooms/asFastAsYouCan/asFastAsYouCan_2_Spieler";
 import { asFastAsYouCan_3_Spieler } from "./rooms/asFastAsYouCan/asFastAsYouCan_3_Spieler";
 import { asFastAsYouCan_4_Spieler } from "./rooms/asFastAsYouCan/asFastAsYouCan_4_Spieler";
+
+import { stratego } from "./rooms/stratego";
+
+import { davincicode } from "./rooms/davincicode";
 // import { hindernisFliegen } from "./rooms/hindernisFliegen";
 // import { Test } from "./rooms/Test";
 
@@ -129,6 +133,9 @@ gameServer.register("asFastAsYouCan_4_Spieler", asFastAsYouCan_4_Spieler);
 
 gameServer.register("gruselino", gruselino);
 
+gameServer.register("stratego", stratego);
+
+gameServer.register("davincicode", davincicode);
 // gameServer.register("Test", Test);
 
 // gameServer.register("hindernisFliegen", hindernisFliegen);
