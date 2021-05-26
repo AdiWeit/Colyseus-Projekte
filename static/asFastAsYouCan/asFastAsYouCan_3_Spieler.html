@@ -1,4 +1,5 @@
 <script type="text/javascript" src="../colyseus.js"></script>
+<h3 id="playerWaitingText">waiting for other players...</h3>
 <div id="settings" style="display: 'none'">
 <input type="text" id="requiredPoints" placeholder="points required for win" value="5">
 <h1 id="selectedSensibility">high sensibility</h1>
@@ -91,6 +92,7 @@ console.log(message)
       }
     }/* removeGame(true);*/
     if (message.type == "spielerDu") {
+      playerWaitingText.style.display = "none";
       spielerIch = message.data;
       player[spielerIch] = {};
       player[spielerIch].selectedSensibility = "high";
@@ -241,7 +243,7 @@ console.log(message)
     var bestTime = {time: "10:10:09", player: -1, same: 0};
     for (var i = 0; i < Object.keys(times).length; i++) {
       if (times[Object.keys(times)[i]] < bestTime.time) {bestTime.time = times[Object.keys(times)[i]]; bestTime.player = i};
-      if (i > 0 && times[Object.keys(times)[i]] == times[Object.keys(times)[i - 1]]) same++;
+      if (i > 0 && times[Object.keys(times)[i]] == times[Object.keys(times)[i - 1]]) bestTime.same++;
     }
     for (var i = 0; i < Object.keys(times).length; i++) {
       if (Object.keys(times)[i] == spielerIch) canvas.fillStyle = "blue";

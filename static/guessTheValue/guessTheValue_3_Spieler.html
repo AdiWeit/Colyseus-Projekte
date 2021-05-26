@@ -1,10 +1,11 @@
-<script type="text/javascript" src="../colyseus.js"></script>
+var player = {points: [], total: 2};<script type="text/javascript" src="../colyseus.js"></script>
+<h3 id="playerWaitingText">waiting for other players...</h3>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
 <div id="voting">
   <input type="text" id="amountOfGlasses" onchange="if (modeSelction.value == 'field' && value > 50) value = 50;" placeholder="glasses to compare at the same time" value="3">
   <input type="text" id="pointsRequiredT" placeholder="points for win" value="5">
   <br>
-  <select id="modeSelction" onchange="modeSelectionChanged(value);">
+  <select value="differentShapes" id="modeSelction" onchange="modeSelectionChanged(value);">
     <option value="normal">normal</option>
     <option value="differentShapes">different shapes</option>
     <option value="field">field</option>
@@ -25,14 +26,14 @@
       sendJson('/guessTheValue/logout', {clientId});
       return 'Are you sure you want to leave?';
   };
-
+  modeSelction.value = "differentShapes";
   var host = window.document.location.host.replace(/:.*/, '');
 var client = new Colyseus.Client(location.protocol.replace("http", "ws") + host + (location.port ? ':' + location.port : ''));
 var room = client.join("guessTheValue_3_Spieler");
   // if (!localStorage.getItem("siteSave")) var siteSave = confirm("Is this website save? (This information is important, because on not save websites, images can't be rendert, which would result an error!)");
   // else siteSave = JSON.parse(localStorage.getItem("siteSave"));
   // localStorage.setItem("siteSave", JSON.stringify(siteSave));
-  var player = {points: []};
+  var player = {points: [], total: 1};
   var mode = "";
   var vote = [];
   var canvas = textur.getContext('2d'); //Dimension
@@ -96,6 +97,7 @@ console.log(message)
       }
     }
     if (message.type == "spielerDu") {
+      playerWaitingText.style.display = "none";
       player.myNumber = message.data;
       mode = "";
       playerReadyList = 0;
