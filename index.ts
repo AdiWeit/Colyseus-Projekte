@@ -53,6 +53,10 @@ import { asFastAsYouCan_2_Spieler } from "./rooms/asFastAsYouCan/asFastAsYouCan_
 import { asFastAsYouCan_3_Spieler } from "./rooms/asFastAsYouCan/asFastAsYouCan_3_Spieler";
 import { asFastAsYouCan_4_Spieler } from "./rooms/asFastAsYouCan/asFastAsYouCan_4_Spieler";
 
+import { uno_2_Spieler } from "./rooms/uno/uno_2_Spieler";
+import { uno_3_Spieler } from "./rooms/uno/uno_3_Spieler";
+import { uno_4_Spieler } from "./rooms/uno/uno_4_Spieler";
+
 import { stratego } from "./rooms/stratego";
 
 import { davincicode } from "./rooms/davincicode";
@@ -130,6 +134,10 @@ gameServer.register("monopolyKartenspiel_3_Spieler", monopolyKartenspiel_3_Spiel
 gameServer.register("asFastAsYouCan_2_Spieler", asFastAsYouCan_2_Spieler);
 gameServer.register("asFastAsYouCan_3_Spieler", asFastAsYouCan_3_Spieler);
 gameServer.register("asFastAsYouCan_4_Spieler", asFastAsYouCan_4_Spieler);
+
+gameServer.register("uno_2_Spieler", uno_2_Spieler);
+gameServer.register("uno_3_Spieler", uno_3_Spieler);
+gameServer.register("uno_4_Spieler", uno_4_Spieler);
 
 gameServer.register("gruselino", gruselino);
 
