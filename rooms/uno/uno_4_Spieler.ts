@@ -37,7 +37,7 @@ maxClients = 4;
     if (this.player2) spielerOnline++;
     if (this.player3) spielerOnline++;
     if (this.player4) spielerOnline++;
-    if (spielerOnline > 1) {
+    if (spielerOnline == 4) {
       console.log("Mehr als 1 Spieler");
       this.broadcast({
         "type": "AnzahlSpieler",

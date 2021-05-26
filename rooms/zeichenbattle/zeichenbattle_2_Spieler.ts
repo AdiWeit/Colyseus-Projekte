@@ -19,7 +19,7 @@ maxClients = 2;
   // this.player3 = null;
   // this.player4 = null;
   onJoin(client) {
-//    console.log(`${client.sessionId} joined.`);
+   console.log(`${client.sessionId} joined.`);
     let newPlayer = {
       id: client.sessionId,
       client: client,
@@ -103,7 +103,7 @@ maxClients = 2;
     this.spielerOnline++;
     console.log("spielerOnline: " + this.spielerOnline);
         console.log(!this.player1 + " - " + !this.player2 + " - " + !this.player3 + " - " + !this.player4 + " - ")
-    if ((this.player1 != null || this.player1 != undefined) && (this.player2 != null || this.player2 != undefined)/* && this.spielerOnline > 1*/) {
+    if (this.spielerOnline == 2/*(this.player1 != null || this.player1 != undefined) && (this.player2 != null || this.player2 != undefined)*//* && this.spielerOnline > 1*/) {
       // für mehr als 2 Spieler:    setTimeout( () =>  { },1000);
       console.log("Mehr als 1 Spieler");
       this.broadcast({
@@ -250,21 +250,6 @@ maxClients = 2;
           AblageListe[1] = "abgebrochen";
         }, 500);
       } */
-    if (data.message.type == "kartenMitte") {
-      zählerListe[0] = 0;
-      AblageListe[0] = [];
-      AblageListe[0][data.message.sender] = 0;
-      while (zählerListe[0] < data.message.data.length) {
-        if ( /*data.message.data[zählerListe[0]]*/!(data.message.data[zählerListe[0]][5] == undefined) && data.message.data[zählerListe[0]][5].length < data.message.data[zählerListe[0]][2].length == false) {
-          AblageListe[0][data.message.sender]++;
-        }
-        zählerListe[0]++;
-      }
-      if (AblageListe[0][data.message.sender] > 0) {
-        console.log(AblageListe[0][data.message.sender] + " Straßen vollständig Spieler " + data.message.sender);
-      }
-      if (AblageListe[0][data.message.sender] > 2) {this.broadcast(data.message.sender + " hat gewonnen!!!"); this.player1 = null; this.player2 = null; this.player3 = null; this.player4 = null; this.spielerOnline = 0; console.log("remove room");}
-    }
     if (/*data.message.type == "Gebot" || */data.message.type == "namenSpieler") {
     //  console.log("Empfänger" + data.message.Empfänger)
       if (data.message.Empfänger == 0) this.send(this.player1.client, data.message);

@@ -85,7 +85,7 @@ maxClients = 2;
     this.spielerOnline++;
     console.log("spielerOnline: " + this.spielerOnline);
         console.log(!this.player1 + " - " + !this.player2 + " - " + !this.player3 + " - " + !this.player4 + " - ")
-    if ((this.player1 != null || this.player1 != undefined) && (this.player2 != null || this.player2 != undefined)/* && this.spielerOnline > 1*/) {
+    if (this.spielerOnline == 2/*(this.player1 != null || this.player1 != undefined) && (this.player2 != null || this.player2 != undefined)*//* && this.spielerOnline > 1*/) {
       // für mehr als 2 Spieler:    setTimeout( () =>  { },1000);
       console.log("Mehr als 1 Spieler");
       this.broadcast({

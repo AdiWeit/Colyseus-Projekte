@@ -23,7 +23,7 @@ maxClients = 3;
     if (this.player4) this.spielerOnline++;
     // this.spielerOnline++;
     console.log(this.player1 + " - " + this.player2 + " - " + this.player3 + " - " + this.player4);
-    if (this.player2 != null && this.player2 != null) {
+    if (this.spielerOnline == 3) {
       if (this.spielerOnline < 2) this.spielerOnline = 2;
       console.log("spielerOnline: " + this.spielerOnline);
       this.send(this.player1.client, {
