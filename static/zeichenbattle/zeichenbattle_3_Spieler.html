@@ -1,4 +1,5 @@
 <script type="text/javascript" src="../colyseus.js"></script>
+<h3 id="playerWaitingText">waiting for other players...</h3>
 <script src="https://adi.nicolaiweitkemper.de/zeichenBattleThemes.js"></script>
 <div id="sidenav" class="sidenav">
   <!-- <a>About</a>
@@ -592,6 +593,7 @@ console.log(message)
     //   }
     // }
     if (message.type == "spielerDu") {
+      playerWaitingText.style.display = "none";
       player.myNumber = message.data;
       if (!message.newRound && confirm("Wollen sie die angefangene Runde weiterspielen?")) {
         if (gerät == "Handy") textur.height -= 75;

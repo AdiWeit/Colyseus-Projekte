@@ -1,4 +1,5 @@
 <script type="text/javascript" src="../colyseus.js"></script>
+<h3 id="playerWaitingText">waiting for other players...</h3>
 <div id="vote">
 <input type="text" placeholder="field format" value="5" id="fieldFormat">
 <br>
@@ -79,6 +80,7 @@ console.log(message)
       }
       if (message.type == "playerName") player.names[message.number] = message.name;
     if (message.type == "spielerDu") {
+      playerWaitingText.style.display = "none";
       player.myNumber = message.data;
       if (localStorage.getItem("spieleOnlineKürzel") != "null" && localStorage.getItem("spieleOnlineKürzel") != null && localStorage.getItem("spieleOnlineKürzel") != "undefined") player.names[message.data] = localStorage.getItem("spieleOnlineKürzel");
       else {

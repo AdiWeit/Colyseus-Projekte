@@ -1,4 +1,5 @@
 <script type="text/javascript" src="../colyseus.js"></script>
+<h3 id="playerWaitingText">waiting for other players...</h3>
 <canvas id="textur" width="3310" height="790" style="opacity:1"></canvas>
 <input type="text" id="message" placeholder="message">
 <button type="button" id="submit" onclick="submit()" name="button">send</button>
@@ -215,6 +216,7 @@ console.log(message)
       }, 222);
     }
     if (message.type == "spielerDu") {
+      playerWaitingText.style.display = "none";
       spielerIch = message.data;
       player[spielerIch] = {figuresPlaced: 0, lastWhole: 0, roundsLeft: 11 - 3*(ReihenfolgeBleibt.length - 2)}
         if (message.newRound != true)

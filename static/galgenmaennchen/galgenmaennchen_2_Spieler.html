@@ -1,4 +1,5 @@
 <script type="text/javascript" src="../colyseus.js"></script>
+<h3 id="playerWaitingText">waiting for other players...</h3>
 <meta charset="utf-8">
 <div id="enterField">
   <input type="text" id="textBox" placeholder="word" style="height: 100px;">
@@ -75,6 +76,7 @@ console.log(message)
     //if (message.type == "playerJoined") player.anzahlAll++;
     if (message.type == "AnzahlSpieler") player.totalPlayer = message.data;
     if (message.type == "spielerDu") {
+      playerWaitingText.style.display = "none";
       player.yourNumber = message.data;
       room.send({
         message: {

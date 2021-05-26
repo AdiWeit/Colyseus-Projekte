@@ -1,4 +1,5 @@
 <script type="text/javascript" src="../colyseus.js"></script>
+<h3 id="playerWaitingText">waiting for other players...</h3>
 <meta charset="utf-8">
 <button type="button" id="turnRight" style="font-size: 40px" onclick="folgenKeyDown({key: 'ArrowRight'});" name="button">⟳</button>
 <button type="button" id="turnLeft" style="font-size: 40px" onclick="folgenKeyDown({key: 'ArrowLeft'});" name="button">⟲</button>
@@ -144,6 +145,7 @@ console.log(message)
     }
     if (message.type == "endGame" && message.alert) alert("Das ein Spieler das Spiel nicht zu ende spielen will, wird das Spiel aufgelöst. Wenn sie ein neues starten wollen, laden sie bitte die Seite neu!");
     if (message.type == "spielerDu") {
+      playerWaitingText.style.display = "none";
       player.myNumber = message.data;
       if (!message.newRound && confirm("Sie haben das Spiel verlassen, bevor es beendet war. Wollen sie es weiterspielen?")) {
         field = JSON.parse(localStorage.getItem("fieldDasVerrueckteLabyrinth"));

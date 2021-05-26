@@ -1,4 +1,5 @@
 <script type="text/javascript" src="../colyseus.js"></script>
+<h3 id="playerWaitingText">waiting for other players...</h3>
 <!-- <script type="text/javascript" src="colyseus.js"></script> -->
 <!-- <script src="https://adi.nicolaiweitkemper.de/Database/js.js"></script> -->
 <!-- <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script> -->
@@ -306,6 +307,7 @@ var room = client.join("monopolyKartenspiel_2_Spieler");
     }
     }
     if (message.type == "spielerDu") {
+      playerWaitingText.style.display = "none";
       spielerIch = message.data;
       spieler[spielerIch].ereignisBevor = {};
       if (message.newRound != true)
