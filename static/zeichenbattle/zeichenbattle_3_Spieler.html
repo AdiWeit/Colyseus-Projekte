@@ -249,6 +249,7 @@ function visibleArrowButton(checked) {
   var host = window.document.location.host.replace(/:.*/, '');
 var client = new Colyseus.Client(location.protocol.replace("http", "ws") + host + (location.port ? ':' + location.port : ''));
 var room = client.join("zeichenbattle_3_Spieler");
+
   function confirmSettings() {
     settings.style.display = "none";
     room.send({
@@ -446,7 +447,7 @@ function voteEnding(type) {
 var points = {};
 var interruptAnimation = false;
   room.onMessage.add(function(message) {
-console.log(message)
+    console.log(message)
     if (message.type == "endGame") {
       alert("somebody doesn't want to continue playing, so the game ends!");
       localStorage.setItem("drawingsZeichenbattle", "{}");
@@ -1184,3 +1185,73 @@ document.onkeydown = function(event) {
     else if (zustände[1] != "none") {
       zustände[0] = "up";
       console.log(zustände[1] + " angehoben");
+    }
+  };
+dataURL = textur.toDataURL();
+var lineCoordinate;
+function getImgDataX() {
+  // buttonLayout(true);
+  var imgData = canvas.getImageData(xMaus + zählerListe[0],yMaus, 1, 1).data;
+    imgData.crossOrigin = "Anonymous";
+    red = imgData[0];
+    green = imgData[1];
+    blue = imgData[2];
+    alpha = imgData[3];
+  //  console.log("red: " + red + " green: " + green + " blue: " + blue + " alpha: " + alpha);
+    zählerListe[2]++;
+}
+function getImgDataY() {
+  // buttonLayout(true);
+  var imgData = canvas.getImageData(xMaus + zählerListe[1],yMaus + zählerListe[0], 1, 1).data;
+    imgData.crossOrigin = "Anonymous";
+    red = imgData[0];
+    green = imgData[1];
+    blue = imgData[2];
+    alpha = imgData[3];
+  //  console.log("red: " + red + " green: " + green + " blue: " + blue + " alpha: " + alpha);
+    zählerListe[2]++;
+}
+
+// Stoppuhr
+var timeDown = 0;
+var running = 0;
+
+function startPause() {
+if (running == 0) {
+  running = 1;
+  // timeDown = 0;
+  increment();
+}
+else {
+  running = 0;
+}
+}
+function resetTimer() {
+running = 0;
+timeDown = 0;
+}
+function increment() {
+if (running == 1) {
+setTimeout(function () {
+  timeDown--;
+  var mins = Math.floor(timeDown/10/60);
+  var secs = Math.floor(timeDown/10);
+      secs -= 60*mins;
+  var tenths = timeDown % 10;
+  if (mins < 10) {
+    mins = "0" + mins
+  }
+  if (secs < 10) {
+    secs = "0" + secs;
+  }
+  document.getElementById('timeText').innerHTML = mins + ":" + secs + ":" + "0" + tenths;
+  if (timeDown > 0) increment();
+  else if (inRound) {
+    drawingFinished();
+    new Audio("https://adi.nicolaiweitkemper.de/Sounds/476176__unadamlar__bell-ringing-ii.wav").play();
+  }
+}, 100);
+}
+}
+
+</script>

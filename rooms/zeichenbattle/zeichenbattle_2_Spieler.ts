@@ -91,8 +91,6 @@ maxClients = 2;
     if (!this.player1) {
       this.player1 = newPlayer;
       if (!this.player2 && !this.player3 && !this.player4) this.spielerOnline = 0;
-      console.log("create spielerOnlineGleich0");
-      this.spielerOnlineGleich0 = 1;
     } else if (!this.player2) {
       this.player2 = newPlayer;
     } else if (!this.player3) {
@@ -112,25 +110,26 @@ maxClients = 2;
       });
 
       if (this.spielerOnline > 2) {
-        this.send(this.player3.id, {
+        this.send(this.player3.client, {
           "type": "spielerDu",
           "data": 2,
           newRound: true
         });
       }
       if (this.spielerOnline > 3) {
-        this.send(this.player4.id, {
+        this.send(this.player4.client, {
           "type": "spielerDu",
           "data": 3,
           newRound: true
         });
       }
-      this.send(this.player1.id, {
+
+      this.send(this.player1.client, {
         type: "spielerDu",
         data: 0,
         newRound: true
       });
-      this.send(this.player2.id, {
+      this.send(this.player2.client, {
         type: "spielerDu",
         data: 1,
         newRound: true
@@ -198,11 +197,11 @@ maxClients = 2;
     //   this.player1 = this.player2;
     //   this.player2 = null;
     // }
-      // if (client.sessionId === this.player1.id) this.player1 = null;
-      // else if (client.sessionId === this.player2.id) this.player2 = null;
-      // else if (client.sessionId === this.player3.id) this.player3 = null;
-      // else if (client.sessionId === this.player4.id) this.player4 = null;
-    // this.spielerOnline--;
+      if (client.sessionId === this.player1.id) this.player1 = null;
+      else if (client.sessionId === this.player2.id) this.player2 = null;
+      else if (client.sessionId === this.player3.id) this.player3 = null;
+      else if (client.sessionId === this.player4.id) this.player4 = null;
+    this.spielerOnline--;
     // if (this.player2 != undefined) this.spielerOnlineGleich0--;
     //  if (this.spielerOnlineGleich0 != undefined && this.spielerOnlineGleich0 == 0) {this.player1 = null; this.player2 = null; this.player3 = null; this.player4 = null; this.spielerOnline = 0; console.log("remove room");}
     // /*  if (!this.player2) {
