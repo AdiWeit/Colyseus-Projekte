@@ -67,6 +67,7 @@
 var client = new Colyseus.Client(location.protocol.replace("http", "ws") + host + (location.port ? ':' + location.port : ''));
 var room = client.join("uno_4_Spieler");
 
+
   function showResults(gewinner, times) {
     sperren[0] = true;
     if (spielerIch == gewinner) {
@@ -88,9 +89,38 @@ var room = client.join("uno_4_Spieler");
       if (times < 5) showResults(gewinner, times + 1);
     }, 500);
   }
+  // size: 200
+  // canvas.fillText("UNO!", window.innerWidth/2 - 200, window.innerHeight/2 - 100);
+  function unoAnimation(x, y, size, direction) {
+    canvas.fillStyle = "red";
+      Layout();
+      for (var i = 30; i < size; i++) {
+        canvas.font = i + "px Georgia";
+        canvas.fillStyle = "red";
+        canvas.fillText("UNO!", x, i + 33 + 80 + 11);
+      }
+    canvas.fillStyle = "white";
+    canvas.font = size + "px Georgia";
+    var waitingTime = 1;
+    canvas.fillText("UNO!", x, y + 5);
+    if (size == 201) {
+      waitingTime = 2000;
+      direction = -1;
+    }
+    if (size > 36) {
+      setTimeout(function () {
+        unoAnimation(x, y + direction, size + direction, direction);
+      }, waitingTime);
+    }
+  }
   // listen to patches coming from the server
   room.onMessage.add(function(message) {
-console.log(message)
+    console.log(message)
+    if (message.type == "Uno!") {
+      // canvas.fillRect(33 + 177*i, 33, 111, 133);
+      new Audio("http://adi.nicolaiweitkemper.de/Sounds/Uno!.wav").play();
+      unoAnimation(33 + 177*message.player, 33 + 111 + 11, 37, 1);
+    }
     if (message.type == "Reihenfolge") {
       spielerAktuell = message.data;
       if (AnzahlSpieler == 2 && spielerIch == 0) {
@@ -118,6 +148,9 @@ console.log(message)
     if (message.type == "plus" && message.empfänger == spielerIch)  getCard(spieler[spielerIch].cards, message.data);
     if (message.type == "gewonnen") showResults(message.data, 0);
     if (message.type == "spielerIch") {
+      setTimeout(function () {
+        unoExpected.boolean = false;
+      }, 2222);
           if (spieler[spielerIch].cards.length == 0) {
             room.send({
               message: {
@@ -135,7 +168,7 @@ console.log(message)
         spieler[Object.keys(spieler)[i+4]] = message.data[1][i];
       }
       spielerAktuell = nextPlayer(spielerAktuell);
-      if (spieler.kartenAbgelegt[spieler.kartenAbgelegt.length - 1][1] == "aussetzen" || ((spieler.kartenAbgelegt[spieler.kartenAbgelegt.length - 1][1] == "Richtungswechsel" && AnzahlSpieler == 2))) spielerAktuell = nextPlayer(spielerAktuell);
+      if (!message.autoZiehen && (spieler.kartenAbgelegt[spieler.kartenAbgelegt.length - 1][1] == "aussetzen" || ((spieler.kartenAbgelegt[spieler.kartenAbgelegt.length - 1][1] == "Richtungswechsel" && AnzahlSpieler == 2)))) spielerAktuell = nextPlayer(spielerAktuell);
       Layout(0)
       if (spielerAktuell == spielerIch) {
       new Audio("https://adi.nicolaiweitkemper.de/Sounds/Elevator-ding-dong-sound-effect%20(Spielerwechsel).mp3").play();
@@ -187,11 +220,12 @@ console.log(message)
     new Audio("https://adi.nicolaiweitkemper.de/Sounds/Fail%20-%20N%C3%B6%C3%B6t.mp3").play();
     getCard(spieler[spielerIch].cards, 1);
     if (spieler[spielerIch].cards[spieler[spielerIch].cards.length - 1][0] == spieler.kartenAbgelegt[spieler.kartenAbgelegt.length - 1][0] || spieler[spielerIch].cards[spieler[spielerIch].cards.length - 1][1] == spieler.kartenAbgelegt[spieler.kartenAbgelegt.length - 1][1] || spieler[spielerIch].cards[spieler[spielerIch].cards.length - 1][0] == "silver" || spieler.kartenAbgelegt[spieler.kartenAbgelegt.length - 1][0] == "silver") {playCard(spieler[spielerIch].cards[spieler[spielerIch].cards.length - 1], spieler[spielerIch].cards.length - 1)}
-    else spielerwechsel();
+    else spielerwechsel(true);
     }
     // else spielerwechsel();
   }
-  function spielerwechsel() {
+  var unoExpected = false;
+  function spielerwechsel(autoZiehen) {
     AblageListe[0] = [];
     for (var i = 4; i < Object.keys(spieler).length; i++) {
       AblageListe[0].push(spieler[Object.keys(spieler)[i]]);
@@ -200,7 +234,8 @@ console.log(message)
         message: {
         type: "spielerIch",
         data: [spieler[spielerIch], AblageListe[0]],
-        sender: spielerIch
+        sender: spielerIch,
+        autoZiehen: autoZiehen
       }
       });
   }
@@ -222,6 +257,17 @@ console.log(message)
       showCard(55 + 177*i, 555, spieler[spielerIch].cards[i]);
     }
     showCard(700, 277, spieler.kartenAbgelegt[spieler.kartenAbgelegt.length - 1]);
+    canvas.fillStyle = "silver";
+    canvas.beginPath();
+    canvas.arc(75, 310, 50,0,Math.PI*2, false);
+    canvas.fill();
+    canvas.fillStyle = "red";
+    canvas.beginPath();
+    canvas.arc(75, 310, 40,0,Math.PI*2, false);
+    canvas.fill();
+    canvas.fillStyle = "white";
+    canvas.font = "33px Georgia";
+    canvas.fillText("UNO", 40, 320);
     if (times < 5) {
       setTimeout(function () {
         Layout(times + 1)
@@ -309,8 +355,9 @@ function nextPlayer(NextPlayer) {
   else if (NextPlayer == -1) NextPlayer = AnzahlSpieler - 1;
   return NextPlayer;
 }
+var cardPlayed = false;
 function playCard(data, card) {
-  if (data[0] == spieler.kartenAbgelegt[spieler.kartenAbgelegt.length - 1][0] || data[1] == spieler.kartenAbgelegt[spieler.kartenAbgelegt.length - 1][1] || data[0] == "silver" || spieler.kartenAbgelegt[spieler.kartenAbgelegt.length - 1][0] == "silver") {
+  if (!cardPlayed && (data[0] == spieler.kartenAbgelegt[spieler.kartenAbgelegt.length - 1][0] || data[1] == spieler.kartenAbgelegt[spieler.kartenAbgelegt.length - 1][1] || data[0] == "silver" || spieler.kartenAbgelegt[spieler.kartenAbgelegt.length - 1][0] == "silver")) {
     console.log("cardOK");
     // "plus2", "aussetzen", "Richtungswechsel", "plus4", "wunschFarbe"
     if (isNaN(data[1]) && data[1].includes("plus")) {
@@ -333,12 +380,25 @@ function playCard(data, card) {
   ///*else */if (/*data[1] == "aussetzen"/* || data[1] == "Richtungswechsel" ||*/ (data[1] == "Richtungswechsel" && AnzahlSpieler == 2)) spielerwechsel();
     // else /*if ()*/ {
       Layout(0);
+      if (spieler[spielerIch].cards.length > 1) unoExpected = {boolean: false, done: false};
+      if (spieler[spielerIch].cards.length == 1) unoExpected = {boolean: true, done: false};
+      if (spieler[spielerIch].cards.length == 0 && !unoExpected.done) {
+        getCard(spieler[spielerIch].cards, 1);
+        setTimeout(function () {
+          new Audio("http://adi.nicolaiweitkemper.de/Sounds/UnoMissed.wav").play();
+        }, 3000);
+        Layout();
+      }
       spielerwechsel();// autoZiehen();
     // }
   }
   else {
     console.log("wrong card");
   }
+  cardPlayed = true;
+  setTimeout(function () {
+    cardPlayed = false;
+  }, 1333);
 }
 function farbwunsch() {
   AblageListe[0] = prompt("Welche Farbe wünschen sie sich? (bitte in Englisch eingeben)").toLowerCase();
@@ -376,6 +436,16 @@ window.addEventListener('mousedown', function() {
     if (xMaus > 55 + 177*i - 22 && xMaus < 55 + 177*i - 22 + 144 && yMaus > 555 - 22 && yMaus < 555 - 22 + 188 && spielerIch == spielerAktuell) {
       console.log(i);
       playCard(spieler[spielerIch].cards[i], i);
+    }
+    // canvas.arc(75, 310, 40,0,Math.PI*2, false);
+    if (xMaus > 75 - 40 && xMaus < 75 + 40 && yMaus > 310 - 40 && yMaus < 310 + 40 && unoExpected.boolean) {
+      unoExpected.done = true;
+      room.send({
+        message: {
+        type: "Uno!",
+        player: spielerIch
+      }
+      });
     }
   }
 });
